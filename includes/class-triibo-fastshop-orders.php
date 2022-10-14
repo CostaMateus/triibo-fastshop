@@ -1,8 +1,8 @@
 <?php
 /**
- * Fastshop
+ * Fast Shop Orders
  *
- * @package Triibo_Fastshop_Orders/Classes
+ * @package Triibo_Fast_Shop/Classes
  * @since   1.0.0
  * @version 1.0.0
  */
@@ -433,11 +433,10 @@ class Triibo_Fast_Shop_Orders
     /**
      * Register log
      *
-     * @param string|null $data
-     * @param string|null $type
+     * @param string $data
      * @return void
      */
-    public function log( $data = "", $type = "info" )
+    public function log( string $data )
     {
         $this->log->add( self::ID, $data );
     }
