@@ -59,7 +59,7 @@ class Triibo_Fast_Shop
 				add_action( "triibo_api_service_add_button", [ $this, "add_btn"          ], 11 );
 
 				// Order Class
-				include_once dirname( __FILE__ ) . "/includes/class-wc-triibo-fastshop-orders.php";
+				include_once dirname( __FILE__ ) . "/includes/class-triibo-fastshop-orders.php";
 				// Order Actions
 				add_action( "woocommerce_order_status_changed", [ $this, "order_split"          ], 7, 4 );
 				add_action( "woocommerce_order_status_changed", [ $this, "order_status_change"  ], 9, 4 );

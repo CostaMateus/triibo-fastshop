@@ -6,12 +6,11 @@
  * @since   1.0.0
  * @version 1.0.0
  */
-
-if ( ! defined( "ABSPATH" ) ) exit;
+defined( "ABSPATH" ) || exit;
 
 
 /**
- * Plugins main class.
+ * Plugins Order class.
  */
 class Triibo_Fast_Shop_Orders
 {
