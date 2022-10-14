@@ -11,9 +11,8 @@ defined( "ABSPATH" ) || exit;
 /**
  * Fastshop shipping method class.
  */
-class Fastshop_Shipping extends WC_Shipping_Method
+class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 {
-
     const ID       = Triibo_Fast_Shop::DOMAIN . "_shipping";
     protected $api = null;
     protected $log = null;
@@ -258,10 +257,10 @@ class Fastshop_Shipping extends WC_Shipping_Method
             $code    = $data[ "errorCode" ];
             $item    = $data[ "data"      ];
 
-            $fs_     = $this->api->env() ? 84 : 3970;
-            $fs_05   = $this->api->env() ? 62 : 4309;
-            $fs_14   = $this->api->env() ? 63 : 4310;
-            $fs_33   = $this->api->env() ? 85 : 4311;
+            $fs_     = $this->api->env() ? 4453 : 3970;
+            $fs_05   = $this->api->env() ? 4454 : 4309;
+            $fs_14   = $this->api->env() ? 4451 : 4310;
+            $fs_33   = $this->api->env() ? 4345 : 4311;
 
             if ( in_array( $code, [ 4001, 4002 ] ) )
             {
