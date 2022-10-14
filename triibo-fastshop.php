@@ -53,26 +53,23 @@ class Triibo_Fast_Shop
 		{
 			if ( class_exists( "WooCommerce" ) )
 			{
-				add_filter( "plugin_action_links_" . plugin_basename( __FILE__ ), [ $this, "plugin_action_links" ] );
-
-				add_action( "admin_menu",                    [ $this, "add_submenu_page" ], 11 );
-				add_action( "triibo_api_service_add_button", [ $this, "add_btn"          ], 11 );
-
 				// Order Class
 				include_once dirname( __FILE__ ) . "/includes/class-triibo-fastshop-orders.php";
-				// Order Actions
-				add_action( "woocommerce_order_status_changed", [ $this, "order_split"          ], 7, 4 );
-				add_action( "woocommerce_order_status_changed", [ $this, "order_status_change"  ], 9, 4 );
-
-				// ignore image upload with error
-				add_filter( "woocommerce_rest_suppress_image_upload_error", [ $this, "image_upload_error" ], 10, 4 );
-
 				// Shipping Class
-				include_once dirname( __FILE__ ) . "/includes/shipping/class-fastshop-shipping.php";
-				// // include_once dirname( __FILE__ ) . "/includes/class-wc-triibo-fastshop-cart.php";
-				// // include_once dirname( __FILE__ ) . "/includes/class-wc-triibo-webservice.php";
+				include_once dirname( __FILE__ ) . "/includes/class-triibo-fastshop-shipping.php";
+
+				add_filter( "plugin_action_links_" . plugin_basename( __FILE__ ), [ $this, "plugin_action_links" ]        );
+				add_filter( "woocommerce_rest_suppress_image_upload_error",       [ $this, "image_upload_error"  ], 10, 4 );
+
+				add_action( "admin_menu",                       [ $this, "add_submenu_page"    ], 11   );
+				add_action( "triibo_api_service_add_button",    [ $this, "add_btn"             ], 11   );
+
+				// Order Actions
+				add_action( "woocommerce_order_status_changed", [ $this, "order_split"         ], 7, 4 );
+				add_action( "woocommerce_order_status_changed", [ $this, "order_status_change" ], 9, 4 );
 				// Shipping Actions
-				add_filter( "woocommerce_shipping_methods", [ $this, "shipping_method" ] );
+				add_filter( "woocommerce_shipping_methods",     [ $this, "shipping_method"     ]       );
+				add_action( "woocommerce_after_shipping_rate",  [ $this, "after_shipping_rate" ], 100  );
 			}
 			else
 			{
@@ -257,11 +254,23 @@ class Triibo_Fast_Shop
 	 */
 	public function shipping_method( $methods )
 	{
-        $methods[ "fastshop-shipping" ] = "Fastshop_Shipping";
+        $methods[ "fastshop-shipping" ] = "Triibo_Fast_Shop_Shipping";
 
 		return $methods;
 	}
 
+	/**
+	 * Adds delivery forecast after method name.
+	 *
+	 * @param WC_Shipping_Rate $shipping_method Shipping method data.
+	 */
+	public function after_shipping_rate( $shipping_method )
+	{
+		$meta_data = $shipping_method->get_meta_data();
+		$total     = isset( $meta_data[ "_delivery_forecast" ] ) ? intval( $meta_data[ "_delivery_forecast" ] ) : 0;
+
+		if ( $total ) echo "<p><small>" . esc_html( sprintf( _n( "Entrega em %d dia útil", "Entrega em %d dias úteis", $total ), $total ) ) . "</small></p>";
+	}
 }
 
 add_action( "plugins_loaded", array( "Triibo_Fast_Shop", "get_instance" ), 222 );
