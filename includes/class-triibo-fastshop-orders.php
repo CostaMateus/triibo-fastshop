@@ -8,22 +8,20 @@
  */
 defined( "ABSPATH" ) || exit;
 
-
 /**
  * Plugins Order class.
  */
 class Triibo_Fast_Shop_Orders
 {
-    const ID     = Triibo_Fast_Shop::DOMAIN . "_orders";
-    private $log = null;
+    const ID            = Triibo_Fast_Shop::DOMAIN . "_orders";
 
-    private $order_id    = null;
-    private $old_status  = null;
-    private $new_status  = null;
+    private $api        = null;
+    private $log        = null;
+    private $type       = null;
 
-    private $type        = null;
-
-    private $api         = null;
+    private $order_id   = null;
+    private $old_status = null;
+    private $new_status = null;
 
 	/**
 	 * Initialize webservice.
