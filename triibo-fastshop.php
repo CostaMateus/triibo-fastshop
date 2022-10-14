@@ -66,6 +66,13 @@ class Triibo_Fast_Shop
 
 				// ignore image upload with error
 				add_filter( "woocommerce_rest_suppress_image_upload_error", [ $this, "image_upload_error" ], 10, 4 );
+
+				// Shipping Class
+				include_once dirname( __FILE__ ) . "/includes/shipping/class-fastshop-shipping.php";
+				// // include_once dirname( __FILE__ ) . "/includes/class-wc-triibo-fastshop-cart.php";
+				// // include_once dirname( __FILE__ ) . "/includes/class-wc-triibo-webservice.php";
+				// Shipping Actions
+				add_filter( "woocommerce_shipping_methods", [ $this, "shipping_method" ] );
 			}
 			else
 			{
@@ -240,6 +247,19 @@ class Triibo_Fast_Shop
 	public function image_upload_error( $false, $upload, $product_get_id, $images )
 	{
 		return true;
+	}
+
+	/**
+	 * Include Fastshop shipping to WooCommerce.
+	 *
+	 * @param  array $methods Default shipping methods.
+	 * @return array
+	 */
+	public function shipping_method( $methods )
+	{
+        $methods[ "fastshop-shipping" ] = "Fastshop_Shipping";
+
+		return $methods;
 	}
 
 }
