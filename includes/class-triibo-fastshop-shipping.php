@@ -13,7 +13,8 @@ defined( "ABSPATH" ) || exit;
  */
 class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 {
-    const ID       = Triibo_Fast_Shop::DOMAIN . "_shipping";
+    const ID       = "fastshop-shipping";
+    const DOMAIN   = Triibo_Fast_Shop::DOMAIN . "_shipping";
     protected $api = null;
     protected $log = null;
 
@@ -29,18 +30,17 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         $this->instance_id        = absint( $instance_id );
 
-        $this->id                 = "fastshop-shipping";                  // Id for your shipping method. Should be uunique.
-        $this->method_title       = __( "Fast Shop" );                    // Title shown in admin
-        $this->method_description = __( "Entrega feita pela Fast Shop" ); // Description shown in admin
+        $this->id                 = self::ID;
+        $this->method_title       = __( "Fast Shop",                    self::DOMAIN );
+        $this->method_description = __( "Entrega feita pela Fast Shop", self::DOMAIN );
 
-        $this->enabled            = "yes";                                // This can be added as an setting but for this example its forced enabled
-        $this->title              = "Fast Shop";                          // This can be added as an setting but for this example its forced.
+        $this->enabled            = "yes";
+        $this->title              = "Fast Shop";
 
-        $this->supports           = array(
+        $this->supports           = [
             "shipping-zones",
             "instance-settings",
-        );
-
+        ];
 
         $this->init();
     }
@@ -66,7 +66,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
         $this->additional_time    = $this->get_option( "additional_time"        );
 
         // Save settings in admin if you have any defined
-        add_action( "woocommerce_update_options_shipping_" . $this->id, array( $this, "process_admin_options" ) );
+        add_action( "woocommerce_update_options_shipping_" . $this->id, [ $this, "process_admin_options" ] );
     }
 
     /**
@@ -74,51 +74,51 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
      */
     public function init_form_fields()
     {
-        $this->instance_form_fields = array(
-            "enabled"            => array(
-                "title"       => __( "Habilitar/Desabilitar" ),
+        $this->instance_form_fields = [
+            "enabled"            => [
                 "type"        => "checkbox",
-                "label"       => __( "Ativar este método de envio" ),
+                "title"       => __( "Habilitar/Desabilitar",                                                   self::DOMAIN ),
+                "label"       => __( "Ativar este método de envio",                                             self::DOMAIN ),
                 "default"     => "yes",
-            ),
-            "title"              => array(
-                "title"       => __( "Título" ),
+            ],
+            "title"              => [
                 "type"        => "text",
-                "description" => __( "Isto controla o título que o usuário vê durante o checkout." ),
+                "title"       => __( "Título",                                                                  self::DOMAIN ),
+                "description" => __( "Isto controla o título que o usuário vê durante o checkout.",             self::DOMAIN ),
                 "desc_tip"    => true,
                 "default"     => $this->method_title,
-            ),
-            "behavior_options"   => array(
-                "title"       => __( "Opções de comportamento" ),
+            ],
+            "behavior_options"   => [
+                "title"       => __( "Opções de comportamento",                                                 self::DOMAIN ),
                 "type"        => "title",
                 "default"     => "",
-            ),
-            "shipping_class_id"  => array(
-                "title"       => __( "Classe de entrega" ),
+            ],
+            "shipping_class_id"  => [
                 "type"        => "multiselect",
-                "description" => __( "Se necessário, selecione uma classe de envio para aplicar neste método." ),
+                "title"       => __( "Classe de entrega",                                                       self::DOMAIN ),
+                "description" => __( "Se necessário, selecione uma classe de envio para aplicar neste método.", self::DOMAIN ),
                 "desc_tip"    => true,
                 "default"     => "",
                 "class"       => "wc-enhanced-select",
                 "options"     => $this->get_shipping_classes_options(),
-            ),
-            "show_delivery_time" => array(
-                "title"       => __( "Tempo de entrega" ),
+            ],
+            "show_delivery_time" => [
                 "type"        => "checkbox",
-                "label"       => __( "Exibir estimativa de entrega" ),
-                "description" => __( "Exibir o tempo estimado de entrega em dias úteis." ),
+                "title"       => __( "Tempo de entrega",                                                        self::DOMAIN ),
+                "label"       => __( "Exibir estimativa de entrega",                                            self::DOMAIN ),
+                "description" => __( "Exibir o tempo estimado de entrega em dias úteis.",                       self::DOMAIN ),
                 "desc_tip"    => true,
                 "default"     => "no",
-            ),
-            "additional_time"    => array(
-                "title"       => __( "Dias adicionais" ),
+            ],
+            "additional_time"    => [
                 "type"        => "text",
-                "description" => __( "Dias úteis adicionais para a estimativa de entrega." ),
+                "title"       => __( "Dias adicionais",                                                         self::DOMAIN ),
+                "description" => __( "Dias úteis adicionais para a estimativa de entrega.",                     self::DOMAIN ),
                 "desc_tip"    => true,
                 "default"     => "0",
                 "placeholder" => "0",
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -129,10 +129,10 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     protected function get_shipping_classes_options()
     {
         $shipping_classes = WC()->shipping->get_shipping_classes();
-        $options          = array(
-            "-1" => __( "Qualquer classe" ),
-            "0"  => __( "Nenhuma classe" ),
-        );
+        $options          = [
+            "-1" => __( "Qualquer classe", self::DOMAIN ),
+            "0"  => __( "Nenhuma classe",  self::DOMAIN ),
+        ];
 
         if ( !empty( $shipping_classes ) ) $options += wp_list_pluck( $shipping_classes, "name", "term_id" );
 
@@ -176,7 +176,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
      * @param mixed $package
      * @return void
      */
-    public function calculate_shipping( $package = array() )
+    public function calculate_shipping( $package = [] )
     {
         // Check if valid to be calculeted
         if ( "" === $package[ "destination" ][ "postcode" ] || "BR" !== $package[ "destination" ][ "country" ] ) return;
@@ -193,7 +193,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         if ( $shipping[ "errorCode" ] )
         {
-            self::log( "calculate_shipping_error", $shipping );
+            $this->log( "calculate_shipping_error", $shipping );
             return;
         }
 
@@ -368,6 +368,6 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
      */
     public function log( string $data )
     {
-        $this->log->add( self::ID, $data );
+        $this->log->add( self::DOMAIN, $data );
     }
 }
