@@ -144,7 +144,7 @@ class Triibo_Fast_Shop
 				$instance = $method->instance_id;
 
 		$url  = esc_url( admin_url( "admin.php?page=wc-settings&tab=shipping&instance_id={$instance}" ) );
-		$text = __( "Configurações", self::DOMAIN );
+		$text = __( "WC Configurações", self::DOMAIN );
 		$link = "<a href='{$url}' >{$text}</a>";
 
 		echo "<p>Triibo Fast Shop | {$link}</p>";
