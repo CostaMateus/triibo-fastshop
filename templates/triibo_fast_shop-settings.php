@@ -13,6 +13,24 @@
 <div class="wrap">
 	<h2>Triibo Fast Shop</h2>
 
+	<?php
+		$instance = null;
+		$shipping = new WC_Shipping_Zones();
+		$zones    = $shipping->get_zones();
+		$index    = array_key_first( $zones);
+		$methods  = $zones[ $index ][ "shipping_methods" ];
+
+		foreach ( $methods as $key => $method )
+			if ( $method && $method->id === Triibo_Fast_Shop_Shipping::ID )
+				$instance = $method->instance_id;
+
+        $url  = esc_url( admin_url( "admin.php?page=wc-settings&tab=shipping&instance_id={$instance}" ) );
+        $text = __( "WC Configurações", Triibo_Fast_Shop_Shipping::DOMAIN );
+        $link = "<a href='{$url}' >{$text}</a>";
+
+        echo "<p>{$link}</p>";
+    ?>
+
 	<h3>Frete</h3>
 	<p> -Cálculo de frete</p>
 	<p> -Atualiza preço e estoque quando produtos são colocados no carrinho</p>
