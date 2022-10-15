@@ -133,7 +133,17 @@ class Triibo_Fast_Shop
 
 	public function add_btn()
 	{
-        $url  = esc_url( admin_url( "admin.php?page=" . self::DOMAIN . "-settings" ) );
+		$instance = null;
+		$shipping = new WC_Shipping_Zones();
+		$zones    = $shipping->get_zones();
+		$index    = array_key_first( $zones);
+		$methods  = $zones[ $index ][ "shipping_methods" ];
+
+		foreach ( $methods as $key => $method )
+			if ( $method && $method->id === Triibo_Fast_Shop_Shipping::ID )
+				$instance = $method->instance_id;
+
+		$url  = esc_url( admin_url( "admin.php?page=wc-settings&tab=shipping&instance_id={$instance}" ) );
 		$text = __( "Configurações", self::DOMAIN );
 		$link = "<a href='{$url}' >{$text}</a>";
 
