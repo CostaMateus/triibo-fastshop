@@ -119,7 +119,7 @@ class Triibo_Fast_Shop
 		add_submenu_page(
 			Triibo_Api_Services::get_name(),
 			"Triibo Fast Shop",
-			"Triibo Fast Shop",
+			"Fast Shop",
 			"manage_options",
 			self::DOMAIN . "-settings",
 			[ $this, "display_admin_menu_settings" ]
