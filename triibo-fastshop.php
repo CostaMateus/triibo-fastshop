@@ -67,6 +67,7 @@ class Triibo_Fast_Shop
 				// Order Actions
 				add_action( "woocommerce_order_status_changed", [ $this, "order_split"         ], 7, 4 );
 				add_action( "woocommerce_order_status_changed", [ $this, "order_status_change" ], 9, 4 );
+				add_action( "admin_init",                       [ $this, "order_notification"  ]       );
 				// Shipping Actions
 				add_filter( "woocommerce_shipping_methods",     [ $this, "shipping_method"     ]       );
 				add_action( "woocommerce_after_shipping_rate",  [ $this, "after_shipping_rate" ], 100  );
@@ -246,6 +247,180 @@ class Triibo_Fast_Shop
 				}
 			}
 		}
+	}
+
+	/**
+	 * Register and build the plugin fields
+	 *
+	 * @since 	1.0.0
+	 */
+	public function order_notification()
+	{
+		$prefix    = self::DOMAIN . "_";
+		$sufix     = "_section";
+
+		$page      = $prefix . "general_settings";
+
+		$fs_fields = [
+			[
+				"key"   => "fs_status",
+				"title" => "Ativar / Desativar",
+				"label" => "Ativar Notificação de pedido para Fast Shop",
+				"value" => false,
+			],
+		];
+
+		register_setting( $page, $prefix . "options" );
+
+		$this->add_allowed_options( $prefix, $page, [ $fs_fields ] );
+
+		add_settings_section( $prefix . "fs" . $sufix, "Notificação de pedidos", [ $this, "message_section" ], $page );
+
+		foreach ( $fs_fields as $index => $field )
+		{
+			$this->add_settings_field( $prefix, $sufix, $page, "fs", $index, $field );
+			$this->register_settings( $prefix, $page, $field );
+		}
+	}
+
+	/**
+	 * Adds plugin fields to allowed options
+	 *
+	 * @since 	1.0.0
+	 *
+	 * @param string $page
+	 * @param array $data
+	 */
+	public function add_allowed_options( $prefix, $page, $data )
+	{
+		$new_options = [ $page => [] ];
+
+		foreach ( $data as $api )
+			foreach ( $api as $field )
+				$new_options[ $page ][] = $prefix . $field[ "key" ];
+
+		add_allowed_options( $new_options );
+	}
+
+	/**
+	 * Echos out any content at the top of the section (between heading and fields).
+	 *
+	 * @since 	1.0.0
+	 *
+	 * @param array $args
+	 */
+	public function message_section( $args )
+	{
+		echo "<p>Configurações</p>";
+	}
+
+	/**
+	 * Configure each plugin field
+	 *
+	 * @since 	1.0.0
+	 *
+	 * @param string $section
+	 * @param string $index
+	 * @param array $field
+	 */
+	public function add_settings_field( $prefix, $sufix, $page, $section, $index, $field )
+	{
+		$id      = $prefix . $field[ "key" ];
+		$title   = $field[ "title" ];
+		$section = $prefix . $section . $sufix;
+
+		add_settings_field(
+            $id, $title, [ $this, "render_settings_field" ], $page, $section,
+			[
+				"type"             => "input",
+				"subtype"          => ( in_array( $index, [ 0, 1 ] ) ) ? "checkbox"        : "text",
+				"label"            => ( in_array( $index, [ 0, 1 ] ) ) ? $field[ "label" ] : "",
+				"value"            => ( $index == 1 ) ? $field[ "value" ] : "",
+				"id"               => $id,
+				"name"             => $id,
+				"required"         => true,
+				"get_options_list" => "",
+				"value_type"       => "normal",
+				"wp_data"          => "option"
+			]
+		);
+	}
+
+	/**
+	 * Renders each field according to the configured args
+	 *
+	 * @since 	1.0.0
+	 *
+	 * @param array $args
+	 */
+	public function render_settings_field( $args )
+	{
+		if ( $args[ "wp_data" ] == "option" )
+		{
+			$wp_data_value = get_option( $args[ "name" ] );
+		}
+		elseif ( $args[ "wp_data" ] == "post_meta" )
+		{
+			$wp_data_value = get_post_meta( $args[ "post_id" ], $args[ "name" ], true );
+		}
+
+		switch ( $args[ "type" ] )
+		{
+			case "input":
+				$status = 0;
+
+				if ( strpos( $args[ "id" ], "fs" ) !== false ) $status = get_option( self::DOMAIN . "_fs_status" );
+
+				$value = ( $args[ "value_type" ] == "serialized" ) ? serialize( $wp_data_value ) : $wp_data_value;
+
+				if ( $args[ "subtype" ] != "checkbox")
+				{
+					$prependStart = ( isset( $args[ "prepend_value" ] ) ) ? "<div class='input-prepend'> <span class='add-on'>{$args[ "prepend_value" ]}</span>" : "";
+					$prependEnd   = ( isset( $args[ "prepend_value" ] ) ) ? "</div>"                   : "";
+					$step         = ( isset( $args[ "step"          ] ) ) ? "step='{$args[ "step" ]}'" : "";
+					$min          = ( isset( $args[ "min"           ] ) ) ? "min='{$args[ "min" ]}'"   : "";
+					$max          = ( isset( $args[ "max"           ] ) ) ? "max='{$args[ "max" ]}'"   : "";
+					$required     = ( $args[ "required" ] && $status    ) ? "required='required'"      : "";
+
+					if ( isset( $args[ "disabled" ] ) )
+					{
+						// hide the actual input bc if it was just a disabled input the info saved in the database would be wrong - bc it would pass empty values and wipe the actual information
+						echo $prependStart . "
+							<input type='{$args[ "subtype" ]}' id='{$args[ "id" ]}_disabled' {$step} {$max} {$min} name='{$args[ "name" ]}_disabled' disabled value='" . esc_attr( $value ) . "' />
+							<input type='hidden' id='{$args[ "id" ]}' {$step} {$max} {$min} name='{$args[ "name" ]}' value='" . esc_attr( $value ) . "' />" . $prependEnd;
+					}
+					else
+					{
+						echo $prependStart . "
+							<input type='{$args[ "subtype" ]}' id='{$args[ "id" ]}' {$required} {$step} {$max} {$min} name='{$args[ "name" ]}' value='" . esc_attr( $value ) . "' />" . $prependEnd;
+					}
+				}
+				else
+				{
+					$checked = ( $value ) ? "checked" : "";
+					echo "<input type='{$args[ "subtype" ]}' id='{$args[ "id" ]}' name='{$args[ "name" ]}' {$checked} />";
+					echo "<label for='{$args[ "id" ]}' >{$args[ "label" ]}</label>";
+				}
+			break;
+
+			// default:
+			// 	# code...
+			// break;
+		}
+	}
+
+	/**
+	 * Register each plugin field
+	 *
+	 * @since 	1.0.0
+	 *
+	 * @param array $field
+	 */
+	public function register_settings( $prefix, $page, $field )
+	{
+		$name = $prefix . $field[ "key" ];
+
+		register_setting( $page, $name );
 	}
 
 	/**
