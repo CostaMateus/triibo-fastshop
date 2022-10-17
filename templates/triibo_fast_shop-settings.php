@@ -49,4 +49,16 @@
 			<li> - qualquer status ( menos aguardando ) muda para processando | pedido é criado e em seguida é aprovado na FS</li>
 		</ul>
 	</p>
+
+	<hr>
+
+	<?php settings_errors(); ?>
+
+	<form method="POST" action="options.php">
+		<?php
+			settings_fields( "triibo_fast_shop_general_settings" );
+			do_settings_sections( "triibo_fast_shop_general_settings" );
+			submit_button();
+		?>
+	</form>
 </div>
