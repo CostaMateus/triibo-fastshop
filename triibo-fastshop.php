@@ -61,16 +61,17 @@ class Triibo_Fast_Shop
 				add_filter( "plugin_action_links_" . plugin_basename( __FILE__ ), [ $this, "plugin_action_links" ]        );
 				add_filter( "woocommerce_rest_suppress_image_upload_error",       [ $this, "image_upload_error"  ], 10, 4 );
 
-				add_action( "admin_menu",                       [ $this, "add_submenu_page"    ], 11   );
-				add_action( "triibo_api_service_add_button",    [ $this, "add_btn"             ], 11   );
+				add_action( "admin_menu",                          [ $this, "add_submenu_page"    ], 11   );
+				add_action( "triibo_api_service_add_button",       [ $this, "add_btn"             ], 11   );
+				add_action( "triibo_api_service_list_plugin_php",  [ $this, "add_info_dependency" ],      );
 
 				// Order Actions
-				add_action( "woocommerce_order_status_changed", [ $this, "order_split"         ], 7, 4 );
-				add_action( "woocommerce_order_status_changed", [ $this, "order_status_change" ], 9, 4 );
-				add_action( "admin_init",                       [ $this, "order_notification"  ]       );
+				add_action( "woocommerce_order_status_changed",    [ $this, "order_split"         ], 7, 4 );
+				add_action( "woocommerce_order_status_changed",    [ $this, "order_status_change" ], 9, 4 );
+				add_action( "admin_init",                          [ $this, "order_notification"  ]       );
 				// Shipping Actions
-				add_filter( "woocommerce_shipping_methods",     [ $this, "shipping_method"     ]       );
-				add_action( "woocommerce_after_shipping_rate",  [ $this, "after_shipping_rate" ], 100  );
+				add_filter( "woocommerce_shipping_methods",        [ $this, "shipping_method"     ]       );
+				add_action( "woocommerce_after_shipping_rate",     [ $this, "after_shipping_rate" ], 100  );
 			}
 			else
 			{
@@ -149,6 +150,12 @@ class Triibo_Fast_Shop
 		$link = "<a href='{$url}' >{$text}</a>";
 
 		echo "<p>Triibo Fast Shop | {$link}</p>";
+	}
+
+
+	public function add_info_dependency()
+	{
+		echo "<p> - Triibo Fast Shop</p>";
 	}
 
 	/**
