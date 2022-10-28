@@ -102,26 +102,20 @@ class Triibo_Fast_Shop_Orders
     {
         $status = get_option( "triibo_fast_shop_fs_status" );
 
-        if ( !$this->type || !$status != "on"  )
-        {
-            $this->log( $status . " - NÂO vai notificar." );
-            return;
-        }
-
-        $this->log( $status . " - vai notificar." );
+        if ( !$this->type || !$status != "on"  ) return;
 
         switch ( $this->type )
         {
             case "ordercreation":
-                // $this->api->fs_order_creation( $this->order_id );
+                $this->api->fs_order_creation( $this->order_id );
             break;
 
             case "orderapproved":
-                // $this->api->fs_order_approved( $this->order_id );
+                $this->api->fs_order_approved( $this->order_id );
             break;
 
             case "ordercancelation":
-                // $this->api->fs_order_cancelation( $this->order_id );
+                $this->api->fs_order_cancelation( $this->order_id );
             break;
         }
     }
