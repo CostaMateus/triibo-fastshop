@@ -248,6 +248,8 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
         $body     = $this->process_package( $package );
         $shipping = $this->api->fs_freight_calculation( $body )[ "data" ];
 
+        $this->log( json_encode( $shipping ) );
+
         foreach ( $shipping[ "data" ] as $sku => &$data )
         {
             $id      = wc_get_product_id_by_sku( $sku );
