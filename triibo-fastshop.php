@@ -26,6 +26,11 @@ class Triibo_Fast_Shop
 	 */
 	const VERSION = "1.0.0";
 
+	/**
+	 * Plugin domain.
+	 *
+	 * @var string
+	 */
 	const DOMAIN  = "triibo_fast_shop";
 
 	/**
