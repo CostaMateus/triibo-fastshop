@@ -66,17 +66,20 @@ class Triibo_Fast_Shop
 				add_filter( "plugin_action_links_" . plugin_basename( __FILE__ ), [ $this, "plugin_action_links" ]        );
 				add_filter( "woocommerce_rest_suppress_image_upload_error",       [ $this, "image_upload_error"  ], 10, 4 );
 
-				add_action( "admin_menu",                         [ $this, "add_submenu_page"    ], 11   );
-				add_action( "triibo_api_service_add_button",      [ $this, "add_btn"             ], 11   );
-				add_action( "triibo_api_service_list_plugin_php", [ $this, "add_info_dependency" ],      );
+				add_action( "admin_menu",                         [ $this, "add_submenu_page"         ], 11    );
+				add_action( "triibo_api_service_add_button",      [ $this, "add_btn"                  ], 11    );
+				add_action( "triibo_api_service_list_plugin_php", [ $this, "add_info_dependency"      ],       );
+
+				// Update stock when added to cart
+				add_action( "woocommerce_add_to_cart",            [ $this, "add_to_cart_update_stock" ], 10, 6 );
 
 				// Order Actions
-				add_action( "woocommerce_order_status_changed",   [ $this, "order_split"         ], 7, 4 );
-				add_action( "woocommerce_order_status_changed",   [ $this, "order_status_change" ], 9, 4 );
-				add_action( "admin_init",                         [ $this, "order_notification"  ]       );
+				add_action( "woocommerce_order_status_changed",   [ $this, "order_split"              ], 7, 4  );
+				add_action( "woocommerce_order_status_changed",   [ $this, "order_status_change"      ], 9, 4  );
+				add_action( "admin_init",                         [ $this, "order_notification"       ]        );
 				// Shipping Actions
-				add_filter( "woocommerce_shipping_methods",       [ $this, "shipping_method"     ]       );
-				add_action( "woocommerce_after_shipping_rate",    [ $this, "after_shipping_rate" ], 100  );
+				add_filter( "woocommerce_shipping_methods",       [ $this, "shipping_method"          ]        );
+				add_action( "woocommerce_after_shipping_rate",    [ $this, "after_shipping_rate"      ], 100   );
 			}
 			else
 			{
@@ -143,10 +146,10 @@ class Triibo_Fast_Shop
 		$instance = null;
 		$shipping = new WC_Shipping_Zones();
 		$zones    = $shipping->get_zones();
-		$index    = array_key_first( $zones);
+		$index    = array_key_first( $zones );
 		$methods  = $zones[ $index ][ "shipping_methods" ];
 
-		foreach ( $methods as $key => $method )
+		foreach ( $methods as $method )
 			if ( $method && $method->id === Triibo_Fast_Shop_Shipping::ID )
 				$instance = $method->instance_id;
 
@@ -157,10 +160,30 @@ class Triibo_Fast_Shop
 		echo "<p>Triibo Fast Shop | {$link}</p>";
 	}
 
-
 	public function add_info_dependency()
 	{
 		echo "<p> - Triibo Fast Shop</p>";
+	}
+
+    /**
+     * Update stock when added to cart
+     */
+	public function add_to_cart_update_stock( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data )
+	{
+        $product = wc_get_product( $product_id );
+        $sku     = $product->get_sku();
+        $split   = explode( "FS-", $sku );
+
+        if ( count( $split ) > 1 )
+        {
+			$api = new Triibo_Api_Php();
+            $api->fs_update_sku( $sku );
+
+			$log = ( function_exists( "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
+            $log->add( Triibo_Fast_Shop_Shipping::DOMAIN, "{$sku} updated" );
+        }
+
+        return;
 	}
 
 	/**
