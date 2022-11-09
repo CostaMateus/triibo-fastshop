@@ -66,7 +66,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
         $this->additional_time    = $this->get_option( "additional_time"        );
 
         // Save settings in admin if you have any defined
-        add_action( "woocommerce_update_options_shipping_" . $this->id, [ $this, "process_admin_options" ] );
+        add_action( "woocommerce_update_options_shipping_" . $this->id, [ $this, "process_admin_options"    ]        );
+        // Update stock when added to cart
+        add_action( "woocommerce_add_to_cart",                          [ $this, "add_to_cart_update_stock" ], 10, 6 );
     }
 
     /**
@@ -361,6 +363,24 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             "items"      => $items
         ];
     }
+
+    /**
+     * Update stock when added to cart
+     */
+	public function add_to_cart_update_stock( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data )
+	{
+        $product = wc_get_product( $product_id );
+        $sku     = $product->get_sku();
+        $split   = explode( "FS-", $sku );
+
+        if ( count( $split ) > 1 )
+        {
+            $this->api->fs_update_sku( $sku );
+            $this->log( "{$sku} updated" );
+        }
+
+        return;
+	}
 
     /**
      * Register log
