@@ -102,10 +102,16 @@ class Triibo_Fast_Shop_Orders
     {
         $status = get_option( "triibo_fast_shop_fs_status" );
 
-        if ( !$this->type || $status != "on"  )
+        if ( $status != "on"  )
         {
             $url = esc_url( admin_url( "admin.php?page=" . Triibo_Fast_Shop::DOMAIN . "-settings" ) );
-            $this->log( "Order notification is disabled: {$url}" );
+            $this->log( "Order notification is disabled. Enable in this link: {$url}" );
+            return;
+        }
+
+        if ( !$this->type )
+        {
+            $this->log( "This changing of status is not mapped: {$this->old_status} >> {$this->new_status}" );
             return;
         }
 
