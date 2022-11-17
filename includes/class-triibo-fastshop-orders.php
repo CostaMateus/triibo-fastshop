@@ -102,22 +102,44 @@ class Triibo_Fast_Shop_Orders
     {
         $status = get_option( "triibo_fast_shop_fs_status" );
 
-        if ( !$this->type || !$status != "on"  ) return;
+        if ( !$this->type || $status != "on"  )
+        {
+            $url = esc_url( admin_url( "admin.php?page=" . Triibo_Fast_Shop::DOMAIN . "-settings" ) );
+            $this->log( "Order notification is disabled: {$url}" );
+            return;
+        }
 
         switch ( $this->type )
         {
             case "ordercreation":
-                $this->api->fs_order_creation( $this->order_id );
+                $this->log( "Creating order FS: #{$this->order_id}" );
+                $response = $this->api->fs_order_creation( $this->order_id );
+                $data     = $response[ "data" ];
+                $message  = ( $response[ "success" ] )
+                            ? "Successfully created: #" . $data[ "data" ][ "orderId" ]
+                            : "Error on creating | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
             break;
 
             case "orderapproved":
-                $this->api->fs_order_approved( $this->order_id );
+                $this->log( "Approving order FS: #{$this->order_id}" );
+                $response = $this->api->fs_order_approved( $this->order_id );
+                $data     = $response[ "data" ];
+                $message  = ( $response[ "success" ] )
+                            ? "Successfully approved: #" . $data[ "data" ][ "orderId" ]
+                            : "Error on approving | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
             break;
 
             case "ordercancelation":
-                $this->api->fs_order_cancelation( $this->order_id );
+                $this->log( "Canceling order FS: #{$this->order_id}" );
+                $response = $this->api->fs_order_cancelation( $this->order_id );
+                $data     = $response[ "data" ];
+                $message  = ( $response[ "success" ] )
+                            ? "Successfully cancelled: #" . $data[ "data" ][ "orderId" ]
+                            : "Error on canceling | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
             break;
         }
+
+        $this->log( $message );
     }
 
     /**

@@ -156,7 +156,11 @@ class Triibo_Fast_Shop
 		$text = __( "WC Configurações", self::DOMAIN );
 		$link = "<a href='{$url}' >{$text}</a>";
 
-		echo "<p>Triibo Fast Shop | {$link}</p>";
+        $url2  = esc_url( admin_url( "admin.php?page=" . self::DOMAIN . "-settings" ) );
+        $text2 = __( "Configurações", self::DOMAIN );
+		$link2 = "<a href='{$url2}' >{$text2}</a>";
+
+		echo "<p>Triibo Fast Shop | {$link} | {$link2}</p>";
 	}
 
 	public function add_info_dependency()
@@ -265,7 +269,7 @@ class Triibo_Fast_Shop
 				 */
 				if ( $old_status != "on-hold" && $new_status == "processing" )
 				{
-					$api = new Triibo_Fast_Shop_Orders( $order_id, "pending", "on-hold");
+					$api = new Triibo_Fast_Shop_Orders( $order_id, "pending", "on-hold" );
 					$api->sendNotification(); // CRIA
 
 					$api->set_process( "on-hold", "processing" );
