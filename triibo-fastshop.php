@@ -74,6 +74,7 @@ class Triibo_Fast_Shop
 				add_action( "woocommerce_add_to_cart",            [ $this, "add_to_cart_update_stock" ], 10, 6 );
 
 				// Order Actions
+				add_action( "woocommerce_thankyou",               [ $this, "order_on_hold"            ], 1     );
 				add_action( "woocommerce_order_status_changed",   [ $this, "order_split"              ], 7, 4  );
 				add_action( "woocommerce_order_status_changed",   [ $this, "order_status_change"      ], 9, 4  );
 				add_action( "admin_init",                         [ $this, "order_notification"       ]        );
@@ -186,10 +187,8 @@ class Triibo_Fast_Shop
         return;
 	}
 
-	/**
-	 * Valid if order needs to be split, based on Fast Shop HUBs
-	 */
-	public function order_split( $order_id, $old_status, $new_status, $order )
+
+	private function is_only_fs( $order )
 	{
 		$items      = $order->get_items();
 		$countItems = count( $items );
@@ -220,7 +219,35 @@ class Triibo_Fast_Shop
 
 		if ( $auxCount != $countItems ) $onlyFS = false;
 
-		if ( $hasFS && $onlyFS )
+		return ( $hasFS == true && $onlyFS == true );
+	}
+
+	private function is_suborder_fs( $order )
+	{
+		$subOrder = empty( $order->get_meta( "has_sub_order" ) ) ? false : true;
+
+		if ( !$subOrder )
+		{
+			$items = $order->get_items();
+
+			foreach ( $items as $item )
+			{
+				$product = $item->get_product();
+				$hub     = $product->get_shipping_class();
+
+				if ( strpos( $hub, "fast-shop" ) !== false ) return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Valid if order needs to be split, based on Fast Shop HUBs
+	 */
+	public function order_split( $order_id, $old_status, $new_status, $order )
+	{
+		if ( $this->is_only_fs( $order ) )
 		{
 			if ( $old_status == "pending" )
 			{
@@ -242,46 +269,44 @@ class Triibo_Fast_Shop
 	 */
 	public function order_status_change( $order_id, $old_status, $new_status, $order )
 	{
-		$subOrder = empty( $order->get_meta( "has_sub_order" ) ) ? false : true;
-
-		if ( !$subOrder )
+		if ( $this->is_suborder_fs( $order ) )
 		{
-			$items = $order->get_items();
-			$hasFS = false;
+			// /**
+			//  * qlqr_status ( -aguardando ) --> processando
+			//  * pedido é CRIADO e na sequencia APROVADO na FS
+			//  */
+			// if ( $old_status != "on-hold" && $new_status == "processing" )
+			// {
+			// 	$api = new Triibo_Fast_Shop_Orders( $order_id, "pending", "on-hold" );
+			// 	$api->sendNotification(); // CRIA
 
-			foreach ( $items as $item )
-			{
-				$product = $item->get_product();
-				$hub     = $product->get_shipping_class();
+			// 	$api->set_process( "on-hold", "processing" );
+			// 	$api->sendNotification(); // APROVA
+			// }
+			// else
+			// {
+			// 	$api = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
+			// 	$api->sendNotification();
+			// }
 
-				if ( strpos( $hub, "fast-shop" ) !== false )
-				{
-					$hasFS = true;
-					break;
-				}
-			}
+			if ( $old_status == "pending" && $new_status == "processing" ) return;
 
-			if ( $hasFS )
-			{
-				/**
-				 * qlqr_status ( -aguardando ) --> processando
-				 * pedido é CRIADO e na sequencia APROVADO na FS
-				 */
-				if ( $old_status != "on-hold" && $new_status == "processing" )
-				{
-					$api = new Triibo_Fast_Shop_Orders( $order_id, "pending", "on-hold" );
-					$api->sendNotification(); // CRIA
-
-					$api->set_process( "on-hold", "processing" );
-					$api->sendNotification(); // APROVA
-				}
-				else
-				{
-					$api = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
-					$api->sendNotification();
-				}
-			}
+			$api = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
+			$api->sendNotification();
 		}
+	}
+
+	// add_action( 'woocommerce_thankyou', 'custom_woocommerce_auto_complete_order' );
+	/**
+	 * Auto On hold all WooCommerce orders.
+	 */
+	public function order_on_hold( $order_id )
+	{
+		if ( !$order_id ) return;
+
+		$order = wc_get_order( $order_id );
+
+		if ( $this->is_only_fs( $order ) ) $order->update_status( "on-hold" );
 	}
 
 	/**
@@ -478,6 +503,7 @@ class Triibo_Fast_Shop
 
 		return $methods;
 	}
+
 }
 
 add_action( "plugins_loaded", array( "Triibo_Fast_Shop", "get_instance" ), 222 );
