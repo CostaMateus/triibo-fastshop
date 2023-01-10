@@ -41,12 +41,13 @@
 	<p> -Notifica FS quando há pedidos ou alteração de status</p>
 	<br>
 	<p>
+		Alterado: <b>09/01/23</b>
+		<br>
 		Notificação de alteração quando:
 		<ul>
-			<li> - qualquer status ( menos processando e concluido ) muda para aguardando | pedido é criado na FS</li>
-			<li> - status aguardando muda para processando | pedido é aprovado na FS</li>
-			<li> - qualquer status ( menos pendente ) muda para cancelado | pedido é cancelado na FS</li>
-			<li> - qualquer status ( menos aguardando ) muda para processando | pedido é criado e em seguida é aprovado na FS</li>
+			<li> - qualquer status ( menos concluido ) mudar para aguardando | pedido é criado na FS</li>
+			<li> - status aguardando mudar para processando | pedido é aprovado na FS</li>
+			<li> - qualquer status ( menos pendente ) mudar para cancelado | pedido é cancelado na FS</li>
 		</ul>
 	</p>
 
