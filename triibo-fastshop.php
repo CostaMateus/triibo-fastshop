@@ -188,7 +188,7 @@ class Triibo_Fast_Shop
 			catch ( Exception $e )
 			{
 				$log = ( function_exists( "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
-				$log->add( self::DOMAIN, $e->getMessage() );
+				$log->add( "fastshop-shipping", $e->getMessage() );
 			}
         }
 
