@@ -128,7 +128,7 @@ class Triibo_Fast_Shop_Orders
                 $data     = $response[ "data" ];
                 $message  = ( $response[ "success" ] )
                             ? "Successfully created: #" . $data[ "data" ][ "orderId" ]
-                            : "Error on creating | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
+                            : "Error on creating #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
             break;
 
             case "orderapproved":
@@ -137,7 +137,7 @@ class Triibo_Fast_Shop_Orders
                 $data     = $response[ "data" ];
                 $message  = ( $response[ "success" ] )
                             ? "Successfully approved: #" . $data[ "data" ][ "orderId" ]
-                            : "Error on approving | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
+                            : "Error on approving #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
             break;
 
             case "ordercancelation":
@@ -146,7 +146,7 @@ class Triibo_Fast_Shop_Orders
                 $data     = $response[ "data" ];
                 $message  = ( $response[ "success" ] )
                             ? "Successfully cancelled: #" . $data[ "data" ][ "orderId" ]
-                            : "Error on canceling | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
+                            : "Error on canceling #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
             break;
         }
 
