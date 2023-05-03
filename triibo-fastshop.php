@@ -542,7 +542,7 @@ class Triibo_Fast_Shop
 		$api = new Triibo_Fast_Shop_Orders( $order->get_id(), "on-hold", "processing" );
 		$api->sendNotification();
 
-		$order->add_order_note( "Pedido aprovado manualmente na FS por: ;" . wp_get_current_user()->display_name );
+		$order->add_order_note( "Pedido aprovado manualmente na FS por: " . wp_get_current_user()->display_name );
 
 		update_post_meta( $order->id, "_fs_orderapproved", "yes" );
 	}
