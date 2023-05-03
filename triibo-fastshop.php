@@ -4,7 +4,7 @@
  * Description:          Comunicação entre MKT, Integração e FastShop. Dependências: Triibo API Services e WooCommerce.
  * Author:               Mateus Costa
  * Author URI:           https://costamateus.com.br/
- * Version:              1.0.1
+ * Version:              1.0.2
  * Text Domain:          triibo_fast_shop
  * RequiresPHP:          7.4
  * RequiresWP:           5.9
@@ -24,7 +24,7 @@ class Triibo_Fast_Shop
 	 *
 	 * @var string
 	 */
-	const VERSION = "1.0.1";
+	const VERSION = "1.0.2";
 
 	/**
 	 * Plugin domain.
@@ -80,6 +80,10 @@ class Triibo_Fast_Shop
 				add_action( "admin_init",                         [ $this, "order_notification"       ]        );
 				// Shipping Actions
 				add_filter( "woocommerce_shipping_methods",       [ $this, "shipping_method"          ]        );
+
+				// Order Box Actions
+				add_action( "woocommerce_order_actions",                         [ $this, "add_order_box_action"     ] );
+				add_action( "woocommerce_order_action_wc_fastshop_order_action", [ $this, "process_order_box_action" ] );
 			}
 			else
 			{
@@ -299,12 +303,13 @@ class Triibo_Fast_Shop
 
 			if ( $old_status == "pending" && $new_status == "processing" ) return;
 
+			if ( $old_status == "on-hold" && $new_status == "processing" ) return;
+
 			$api = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
 			$api->sendNotification();
 		}
 	}
 
-	// add_action( 'woocommerce_thankyou', 'custom_woocommerce_auto_complete_order' );
 	/**
 	 * Auto On hold all WooCommerce orders.
 	 */
@@ -510,6 +515,36 @@ class Triibo_Fast_Shop
         $methods[ "fastshop-shipping" ] = "Triibo_Fast_Shop_Shipping";
 
 		return $methods;
+	}
+
+	/**
+	 * Add custom action to order box.
+	 */
+	public function add_order_box_action( $actions )
+	{
+		global $theorder;
+
+		if ( $this->is_only_fs( $theorder ) && $theorder->has_status( "processing" ) && !get_post_meta( $theorder->id, "_fs_orderapproved", true ) )
+		{
+			$actions[ "wc_fastshop_order_action" ] = __( "Aprovar na Fast Shop", self::DOMAIN );
+
+			return $actions;
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Process custom action order box.
+	 */
+	public function process_order_box_action( $order )
+	{
+		$api = new Triibo_Fast_Shop_Orders( $order->get_id(), "on-hold", "processing" );
+		$api->sendNotification();
+
+		$order->add_order_note( "Pedido aprovado manualmente na FS por: ;" . wp_get_current_user()->display_name );
+
+		update_post_meta( $order->id, "_fs_orderapproved", "yes" );
 	}
 
 }
