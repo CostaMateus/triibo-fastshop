@@ -13,10 +13,13 @@ defined( "ABSPATH" ) || exit;
  */
 class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 {
-    const ID       = "fastshop-shipping";
-    const DOMAIN   = Triibo_Fast_Shop::DOMAIN . "_shipping";
-    protected $api = null;
-    protected $log = null;
+    const ID                      = "fastshop-shipping";
+    const DOMAIN                  = Triibo_Fast_Shop::DOMAIN . "_shipping";
+    protected $api                = null;
+    protected $log                = null;
+    protected $additional_time    = null;
+    protected $shipping_class_id  = null;
+    protected $show_delivery_time = null;
 
     /**
      * Initialize the Correios shipping method.
