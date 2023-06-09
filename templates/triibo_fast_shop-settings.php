@@ -43,6 +43,8 @@
 	<p>
 		Alterado: <b>09/01/23</b>
 		<br>
+		TODOS os pedidos da FS entram como AGUARDANDO.
+		<br>
 		Notificação de alteração quando:
 		<ul>
 			<li> - qualquer status ( menos concluido ) mudar para aguardando | pedido é criado na FS</li>
