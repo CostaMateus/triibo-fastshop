@@ -74,7 +74,7 @@ class Triibo_Fast_Shop
 				add_action( "woocommerce_add_to_cart",            [ $this, "add_to_cart_update_stock" ], 10, 6 );
 
 				// Order Actions
-				add_action( "woocommerce_thankyou",               [ $this, "order_on_hold"            ], 1     );
+				// add_action( "woocommerce_thankyou",               [ $this, "order_on_hold"            ], 1     );
 				add_action( "woocommerce_order_status_changed",   [ $this, "order_split"              ], 7, 4  );
 				add_action( "woocommerce_order_status_changed",   [ $this, "order_status_change"      ], 9, 4  );
 				add_action( "admin_init",                         [ $this, "order_notification"       ]        );
@@ -315,11 +315,11 @@ class Triibo_Fast_Shop
 	 */
 	public function order_on_hold( $order_id )
 	{
-		if ( !$order_id ) return;
+		// if ( !$order_id ) return;
 
-		$order = wc_get_order( $order_id );
+		// $order = wc_get_order( $order_id );
 
-		if ( $this->is_only_fs( $order ) ) $order->update_status( "on-hold" );
+		// if ( $this->is_only_fs( $order ) ) $order->update_status( "on-hold" );
 	}
 
 	/**
