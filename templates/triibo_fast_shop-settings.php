@@ -40,19 +40,15 @@
 	<p> -Pedidos com mais de um HUB de entrega FS, é dividido em sub-pedidos</p>
 	<p> -Notifica FS quando há pedidos ou alteração de status</p>
 	<br>
-	<p>
-		Alterado: <b>09/06/23</b>
-		<br>
-		<div style="text-decoration:line-through;">TODOS os pedidos da FS entram como AGUARDANDO.</div>
-		<br>
-		Notificação de alteração quando:
-		<ul>
-			<li> - qualquer status ( menos concluido ) mudar para aguardando | pedido é CRIADO na FS</li>
-			<li> - status pendente mudar para processando | pedido é CRIADO na FS <small>*new</small></li>
-			<li> - status aguardando mudar para processando | pedido é APROVADO na FS</li>
-			<li> - qualquer status ( menos pendente ) mudar para cancelado | pedido é CANCELADO na FS</li>
-		</ul>
-	</p>
+	<p style="margin-bottom:0;"                      >Alterado: <b>09/06/23</b></p>
+	<p style="text-decoration:line-through;margin:0;">TODOS os pedidos da FS entram como AGUARDANDO.</p>
+	<p style="margin:0;"                             >Notificação de alteração quando:</p>
+	<ul style="margin-top:0;" >
+		<li> - qualquer status ( menos concluido ) mudar para aguardando | pedido é CRIADO na FS</li>
+		<li> - status pendente mudar para processando | pedido é CRIADO na FS <small>(new)</small></li>
+		<li> - status aguardando mudar para processando | pedido é APROVADO na FS</li>
+		<li> - qualquer status ( menos pendente ) mudar para cancelado | pedido é CANCELADO na FS</li>
+	</ul>
 
 	<hr>
 
