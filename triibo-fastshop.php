@@ -301,7 +301,7 @@ class Triibo_Fast_Shop
 			// 	$api->sendNotification();
 			// }
 
-			if ( $old_status == "pending" && $new_status == "processing" ) return;
+			// if ( $old_status == "pending" && $new_status == "processing" ) return;
 
 			if ( $old_status == "on-hold" && $new_status == "processing" ) return;
 
