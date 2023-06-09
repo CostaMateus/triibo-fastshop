@@ -77,9 +77,14 @@ class Triibo_Fast_Shop_Orders
 
         /**
          * qlqr_status ( -concluido ) --> aguardando
+         * pendente --> processando
          * pedido é CRIADO na FS
          */
-        if ( $this->old_status != "completed" && $this->new_status == "on-hold" )
+        if (
+            ( $this->old_status != "completed" && $this->new_status == "on-hold"    )
+            ||
+            ( $this->old_status == "pending"   && $this->new_status == "processing" )
+        )
         {
             $this->type = "ordercreation";
         }
