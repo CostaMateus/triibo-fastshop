@@ -156,6 +156,11 @@ class Triibo_Fast_Shop_Orders
         }
 
         $this->log( $message );
+
+        return [
+            "success" => $response[ "success" ],
+            "message" => $message,
+        ];
     }
 
     /**
