@@ -26,7 +26,8 @@ class Triibo_Fast_Shop_Orders
 	/**
 	 * Initialize webservice.
 	 *
-	 * @param array $package Shipping package.
+     * @since   1.0.0
+	 * @param   array $package Shipping package.
 	 */
 	public function __construct( $order_id = null, $old_status = null, $new_status = null )
     {
@@ -55,6 +56,13 @@ class Triibo_Fast_Shop_Orders
         return $this->type;
     }
 
+    /**
+     * Set process
+     *
+     * @param   string  $old_status
+     * @param   string  $new_status
+     * @return  void
+     */
     public function set_process( $old_status, $new_status )
     {
 		$this->old_status = $old_status;
@@ -66,7 +74,8 @@ class Triibo_Fast_Shop_Orders
 	/**
 	 * Process the order
 	 *
-	 * @return bool
+     * @since   1.0.0
+	 * @return  void
 	 */
 	private function process_order()
     {
@@ -119,6 +128,12 @@ class Triibo_Fast_Shop_Orders
         }
     }
 
+    /**
+     * Process the order, send to integration
+     *
+     * @since   1.0.0
+     * @return  array
+     */
     public function send_notification()
     {
         $status = get_option( "triibo_fast_shop_fs_status" );
@@ -209,6 +224,9 @@ class Triibo_Fast_Shop_Orders
 
     /**
      * Valid if it is necessary to create sub-orders for the order in question
+     *
+     * @since   1.0.0
+     * @return  void
      */
     public function maybe_split_orders( $parent_order_id, $parent_order )
     {
@@ -263,6 +281,9 @@ class Triibo_Fast_Shop_Orders
 
     /**
      * Creates the sub-order
+     *
+     * @since   1.0.0
+     * @return  void|WP_Error
      */
     private function create_sub_order( $parent_order, $seller_id, $hub, $hub_products )
     {
@@ -346,6 +367,9 @@ class Triibo_Fast_Shop_Orders
 
     /**
      * Creates line items for the sub-order
+     *
+     * @since   1.0.0
+     * @return  void
      */
     private function create_line_items( $order, $products )
     {
@@ -378,6 +402,9 @@ class Triibo_Fast_Shop_Orders
 
     /**
      * Creates shipping for the sub-order
+     *
+     * @since   1.0.0
+     * @return  void
      */
     private function create_shipping( $order, $parent_order, $products )
     {
@@ -445,6 +472,9 @@ class Triibo_Fast_Shop_Orders
 
     /**
      * Creates taxes for the sub-order
+     *
+     * @since   1.0.0
+     * @return  void
      */
     private function create_taxes( $order, $parent_order, $products )
     {
@@ -476,6 +506,9 @@ class Triibo_Fast_Shop_Orders
 
     /**
      * Creates coupons for the sub-order
+     *
+     * @since   1.0.0
+     * @return  void
      */
     private function create_coupons( $order, $parent_order, $products )
     {
@@ -522,8 +555,8 @@ class Triibo_Fast_Shop_Orders
     /**
      * Register log
      *
-     * @param string $data
-     * @return void
+     * @param   string $data
+     * @return  void
      */
     public function log( string $data )
     {

@@ -24,7 +24,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Initialize the Correios shipping method.
      *
-     * @param int $instance_id Shipping zone instance ID.
+     * @since   1.0.0
+     * @param   int $instance_id Shipping zone instance ID.
+     * @return  void
      */
     public function __construct( $instance_id = 0 )
     {
@@ -51,8 +53,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Init your settings
      *
-     * @access public
-     * @return void
+     * @since   1.0.0
+     * @access  public
+     * @return  void
      */
     function init()
     {
@@ -74,6 +77,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
     /**
      * Admin options fields.
+     *
+     * @since   1.0.0
+     * @return  void
      */
     public function init_form_fields()
     {
@@ -127,7 +133,8 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Get shipping classes options.
      *
-     * @return array
+     * @since   1.0.0
+     * @return  array
      */
     protected function get_shipping_classes_options()
     {
@@ -145,8 +152,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Check if package uses only the selected shipping class.
      *
-     * @param  array $package Cart package.
-     * @return bool
+     * @since   1.0.0
+     * @param   array $package Cart package.
+     * @return  bool
      */
     protected function has_only_selected_shipping_class( $package )
     {
@@ -175,9 +183,10 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * calculate_shipping function.
      *
-     * @access public
-     * @param mixed $package
-     * @return void
+     * @since   1.0.0
+     * @access  public
+     * @param   mixed $package
+     * @return  void
      */
     public function calculate_shipping( $package = [] )
     {
@@ -242,9 +251,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 	/**
 	 * Get shipping rate.
 	 *
-	 * @param  array $package Cart package.
-	 *
-	 * @return SimpleXMLElement|null
+     * @since   1.0.0
+	 * @param   array $package Cart package.
+	 * @return  SimpleXMLElement|null
 	 */
 	protected function get_rate( $package )
     {
@@ -342,8 +351,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Process the package
      *
-     * @param array $package
-     * @return array
+     * @since   1.0.0
+     * @param   array $package
+     * @return  array
      */
     private function process_package( $package )
     {
@@ -368,8 +378,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Register log
      *
-     * @param string $data
-     * @return void
+     * @since   1.0.0
+     * @param   string $data
+     * @return  void
      */
     public function log( string $data )
     {

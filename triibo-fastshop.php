@@ -22,28 +22,32 @@ class Triibo_Fast_Shop
 	/**
 	 * Plugin version.
 	 *
-	 * @var string
+     * @since   1.0.0
+	 * @var 	string
 	 */
 	const VERSION = "1.1.0";
 
 	/**
 	 * Plugin domain.
 	 *
-	 * @var string
+     * @since   1.0.0
+	 * @var 	string
 	 */
 	const DOMAIN  = "triibo_fast_shop";
 
 	/**
 	 * Instance of this class.
 	 *
-	 * @var object
+     * @since   1.0.0
+	 * @var 	object
 	 */
 	protected static $instance = null;
 
 	/**
 	 * Return an instance of this class.
 	 *
-	 * @return object A single instance of this class.
+     * @since   1.0.0
+	 * @return 	object A single instance of this class.
 	 */
 	public static function get_instance()
     {
@@ -52,6 +56,11 @@ class Triibo_Fast_Shop
 		return self::$instance;
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @since 	1.0.0
+	 */
 	private function __construct()
     {
 		if ( class_exists( "Triibo_Api_Services" ) )
@@ -98,6 +107,9 @@ class Triibo_Fast_Shop
 
 	/**
 	 * WooCommerce missing notice.
+	 *
+     * @since   1.0.0
+     * @return  void
 	 */
 	public static function woocommerce_missing_notice()
 	{
@@ -106,6 +118,9 @@ class Triibo_Fast_Shop
 
 	/**
 	 * Triibo-Api-Service missing notice.
+	 *
+     * @since   1.0.0
+     * @return  void
 	 */
 	public static function triibo_api_services_missing_notice()
 	{
@@ -115,6 +130,7 @@ class Triibo_Fast_Shop
 	/**
 	 * Action links.
 	 *
+     * @since   1.0.0
 	 * @param 	array $links
 	 * @return 	array
 	 */
@@ -128,6 +144,12 @@ class Triibo_Fast_Shop
 		return array_merge( $plugin_links, $links );
 	}
 
+	/**
+	 * Add submenu page
+	 *
+     * @since   1.0.0
+	 * @return 	void
+	 */
 	public function add_submenu_page()
 	{
 		add_submenu_page(
@@ -140,11 +162,23 @@ class Triibo_Fast_Shop
 		);
 	}
 
+	/**
+	 * Display erros settings
+	 *
+     * @since   1.0.0
+	 * @return 	void
+	 */
 	public function display_admin_menu_settings()
 	{
 		include_once dirname( __FILE__ ) . "/templates/" . self::DOMAIN . "-settings.php";
 	}
 
+	/**
+	 * Add btn link
+	 *
+     * @since   1.0.0
+	 * @return 	void
+	 */
 	public function add_btn()
 	{
 		$instance = null;
@@ -168,6 +202,12 @@ class Triibo_Fast_Shop
 		echo "<p>Triibo Fast Shop | {$link} | {$link2}</p>";
 	}
 
+	/**
+	 * Add info dependency
+	 *
+     * @since   1.0.0
+	 * @return 	void
+	 */
 	public function add_info_dependency()
 	{
 		echo "<p> - Triibo Fast Shop</p>";
@@ -175,6 +215,9 @@ class Triibo_Fast_Shop
 
     /**
      * Update stock when added to cart
+	 *
+     * @since   1.0.0
+     * @return  void
      */
 	public function add_to_cart_update_stock( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data )
 	{
@@ -199,7 +242,12 @@ class Triibo_Fast_Shop
         return;
 	}
 
-
+	/**
+	 * Validates if the order is only from FastShop
+	 *
+     * @since   1.0.0
+	 * @return 	bool
+	 */
 	private function is_only_fs( $order )
 	{
 		$items      = $order->get_items();
@@ -234,6 +282,12 @@ class Triibo_Fast_Shop
 		return ( $hasFS == true && $onlyFS == true );
 	}
 
+	/**
+	 * validates if the order is a suborder from FastShop
+	 *
+     * @since   1.0.0
+	 * @return 	bool
+	 */
 	private function is_suborder_fs( $order )
 	{
 		$subOrder = empty( $order->get_meta( "has_sub_order" ) ) ? false : true;
@@ -256,6 +310,9 @@ class Triibo_Fast_Shop
 
 	/**
 	 * Valid if order needs to be split, based on Fast Shop HUBs
+	 *
+     * @since   1.0.0
+     * @return  void
 	 */
 	public function order_split( $order_id, $old_status, $new_status, $order )
 	{
@@ -278,6 +335,9 @@ class Triibo_Fast_Shop
 
 	/**
 	 * Valid if it is a Fast Shop order and sends notification for integration
+	 *
+     * @since   1.0.0
+     * @return  void
 	 */
 	public function order_status_change( $order_id, $old_status, $new_status, $order )
 	{
@@ -333,6 +393,9 @@ class Triibo_Fast_Shop
 
 	/**
 	 * Auto On hold all WooCommerce orders.
+	 *
+     * @since   1.0.0
+     * @return  void
 	 */
 	public function order_on_hold( $order_id )
 	{
@@ -347,6 +410,7 @@ class Triibo_Fast_Shop
 	 * Register and build the plugin fields
 	 *
 	 * @since 	1.0.0
+     * @return  void
 	 */
 	public function order_notification()
 	{
@@ -381,9 +445,9 @@ class Triibo_Fast_Shop
 	 * Adds plugin fields to allowed options
 	 *
 	 * @since 	1.0.0
-	 *
-	 * @param string $page
-	 * @param array $data
+	 * @param 	string $page
+	 * @param 	array $data
+	 * @return  void
 	 */
 	public function add_allowed_options( $prefix, $page, $data )
 	{
@@ -400,8 +464,8 @@ class Triibo_Fast_Shop
 	 * Echos out any content at the top of the section (between heading and fields).
 	 *
 	 * @since 	1.0.0
-	 *
-	 * @param array $args
+	 * @param 	array $args
+	 * @return 	void
 	 */
 	public function message_section( $args )
 	{
@@ -412,10 +476,9 @@ class Triibo_Fast_Shop
 	 * Configure each plugin field
 	 *
 	 * @since 	1.0.0
-	 *
-	 * @param string $section
-	 * @param string $index
-	 * @param array $field
+	 * @param 	string $section
+	 * @param 	string $index
+	 * @param 	array $field
 	 */
 	public function add_settings_field( $prefix, $sufix, $page, $section, $index, $field )
 	{
@@ -444,8 +507,7 @@ class Triibo_Fast_Shop
 	 * Renders each field according to the configured args
 	 *
 	 * @since 	1.0.0
-	 *
-	 * @param array $args
+	 * @param 	array $args
 	 */
 	public function render_settings_field( $args )
 	{
@@ -507,8 +569,7 @@ class Triibo_Fast_Shop
 	 * Register each plugin field
 	 *
 	 * @since 	1.0.0
-	 *
-	 * @param array $field
+	 * @param 	array $field
 	 */
 	public function register_settings( $prefix, $page, $field )
 	{
@@ -519,6 +580,9 @@ class Triibo_Fast_Shop
 
 	/**
 	 * Ignore image upload with error
+	 *
+     * @since   1.0.0
+	 * @return 	bool
 	 */
 	public function image_upload_error( $false, $upload, $product_get_id, $images )
 	{
@@ -528,8 +592,9 @@ class Triibo_Fast_Shop
 	/**
 	 * Include Fastshop shipping to WooCommerce.
 	 *
-	 * @param  array $methods Default shipping methods.
-	 * @return array
+     * @since   1.0.0
+	 * @param  	array $methods Default shipping methods.
+	 * @return 	array
 	 */
 	public function shipping_method( $methods )
 	{
@@ -540,6 +605,10 @@ class Triibo_Fast_Shop
 
 	/**
 	 * Add custom action to order box.
+	 *
+     * @since   1.0.0
+	 * @param 	array $actions
+     * @return  array
 	 */
 	public function add_order_box_action( $actions )
 	{
@@ -557,6 +626,9 @@ class Triibo_Fast_Shop
 
 	/**
 	 * Process custom action order box.
+	 *
+     * @since   1.0.0
+     * @return  void
 	 */
 	public function process_order_box_action( $order )
 	{
