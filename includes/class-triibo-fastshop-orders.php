@@ -44,6 +44,17 @@ class Triibo_Fast_Shop_Orders
         }
 	}
 
+    /**
+     * Get processing type
+     *
+     * @since   1.1.0
+     * @return  string
+     */
+    public function get_type()
+    {
+        return $this->type;
+    }
+
     public function set_process( $old_status, $new_status )
     {
 		$this->old_status = $old_status;
@@ -108,7 +119,7 @@ class Triibo_Fast_Shop_Orders
         }
     }
 
-    public function sendNotification()
+    public function send_notification()
     {
         $status = get_option( "triibo_fast_shop_fs_status" );
 
@@ -131,6 +142,7 @@ class Triibo_Fast_Shop_Orders
                 $this->log( "Creating order FS: #{$this->order_id}" );
                 $response = $this->api->fs_order_creation( $this->order_id );
                 $data     = $response[ "data" ];
+                $errCode  = $data[ "errorCode" ];
                 $message  = ( $response[ "success" ] )
                             ? "Successfully created: #" . $data[ "data" ][ "orderId" ]
                             : "Error on creating #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
@@ -140,6 +152,7 @@ class Triibo_Fast_Shop_Orders
                 $this->log( "Approving order FS: #{$this->order_id}" );
                 $response = $this->api->fs_order_approved( $this->order_id );
                 $data     = $response[ "data" ];
+                $errCode  = $data[ "errorCode" ];
                 $message  = ( $response[ "success" ] )
                             ? "Successfully approved: #" . $data[ "data" ][ "orderId" ]
                             : "Error on approving #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
@@ -147,8 +160,38 @@ class Triibo_Fast_Shop_Orders
 
             case "ordercancelation":
                 $this->log( "Canceling order FS: #{$this->order_id}" );
-                $response = $this->api->fs_order_cancelation( $this->order_id );
-                $data     = $response[ "data" ];
+
+
+                /**
+                 * Add retry logic
+                 *
+                 * @since 1.1.0
+                 */
+                $retry = 0;
+
+                do
+                {
+                    $response = $this->api->fs_order_cancelation( $this->order_id );
+                    $data     = $response[ "data" ];
+
+                    if ( !$response[ "success" ] )
+                    {
+                        // 4001 erro na FS
+                        // 4002 pedido sem ID fastshop
+                        if ( $data[ "errorCode" ] == "4001" )
+                        {
+                            $retry = 3;
+                        }
+                        else
+                        {
+                            $retry++;
+                            sleep( 5 );
+                        }
+                    }
+                }
+                while ( $retry < 3 || !$response[ "success" ] );
+
+                $errCode  = $data[ "errorCode" ];
                 $message  = ( $response[ "success" ] )
                             ? "Successfully cancelled: #" . $data[ "data" ][ "orderId" ]
                             : "Error on canceling #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
@@ -158,8 +201,9 @@ class Triibo_Fast_Shop_Orders
         $this->log( $message );
 
         return [
-            "success" => $response[ "success" ],
-            "message" => $message,
+            "success"   => $response[ "success" ],
+            "message"   => $message,
+            "errorCode" => $errCode
         ];
     }
 

@@ -4,7 +4,7 @@
  * Description:          Comunicação entre MKT, Integração e FastShop. Dependências: Triibo API Services e WooCommerce.
  * Author:               Mateus Costa
  * Author URI:           https://costamateus.com.br/
- * Version:              1.0.3
+ * Version:              1.1.0
  * Text Domain:          triibo_fast_shop
  * RequiresPHP:          7.4
  * RequiresWP:           5.9
@@ -24,7 +24,7 @@ class Triibo_Fast_Shop
 	 *
 	 * @var string
 	 */
-	const VERSION = "1.0.3";
+	const VERSION = "1.1.0";
 
 	/**
 	 * Plugin domain.
@@ -290,23 +290,44 @@ class Triibo_Fast_Shop
 			// if ( $old_status != "on-hold" && $new_status == "processing" )
 			// {
 			// 	$api = new Triibo_Fast_Shop_Orders( $order_id, "pending", "on-hold" );
-			// 	$api->sendNotification(); // CRIA
+			// 	$api->send_notification(); // CRIA
 
 			// 	$api->set_process( "on-hold", "processing" );
-			// 	$api->sendNotification(); // APROVA
+			// 	$api->send_notification(); // APROVA
 			// }
 			// else
 			// {
 			// 	$api = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
-			// 	$api->sendNotification();
+			// 	$api->send_notification();
 			// }
 
 			// if ( $old_status == "pending" && $new_status == "processing" ) return;
 
 			if ( $old_status == "on-hold" && $new_status == "processing" ) return;
 
-			$api = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
-			$api->sendNotification();
+			$api      = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
+			$response = $api->send_notification();
+
+			/**
+			 * Add note when order cancelation fails.
+			 *
+			 * @since 1.1.0
+			 */
+			if ( $api->get_type() == "ordercancelation" && !$response[ "success" ] )
+			{
+				switch ( $response[ "errorCode" ] )
+				{
+					case "4001":
+						$message = "FALHA ao cancelar pedido na FASTSHOP.";
+					break;
+
+					case "4002":
+						$message = "Pedido sem ID FASTSHOP, não encontrado!";
+					break;
+				}
+
+				$order->add_order_note( $message );
+			}
 		}
 	}
 
@@ -540,7 +561,7 @@ class Triibo_Fast_Shop
 	public function process_order_box_action( $order )
 	{
 		$api      = new Triibo_Fast_Shop_Orders( $order->get_id(), "on-hold", "processing" );
-		$response = $api->sendNotification();
+		$response = $api->send_notification();
 
 		if ( $response[ "success" ] )
 		{
