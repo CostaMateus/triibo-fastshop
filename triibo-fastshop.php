@@ -1,15 +1,16 @@
 <?php
 /**
- * Plugin Name:          #Triibo_Fast_Shop
- * Description:          Comunicação entre MKT, Integração e FastShop. Dependências: Triibo API Services e WooCommerce.
- * Author:               Mateus Costa
- * Author URI:           https://costamateus.com.br/
- * Version:              1.1.0
- * Text Domain:          triibo_fast_shop
- * RequiresPHP:          7.4
- * RequiresWP:           5.9
- * WC requires at least: 5.8
- * WC tested up to:      6.3
+ * Plugin Name: 			#Triibo_Fast_Shop
+ * Plugin URI: 				https://triibo.com.br
+ * Description: 			Comunicação entre MKT, Integração e FastShop. Dependências: Triibo API Services e WooCommerce.
+ * Author: 					Mateus Costa
+ * Author URI: 				https://costamateus.com.br/
+ * Version: 				1.2.0
+ * Text Domain: 			triibo_fast_shop
+ * RequiresPHP: 			7.4
+ * RequiresWP: 				5.9
+ * WC requires at least: 	5.8
+ * WC tested up to: 		6.3
  *
  * @package Triibo_Fast_Shop
  */
@@ -25,7 +26,7 @@ class Triibo_Fast_Shop
      * @since   1.0.0
 	 * @var 	string
 	 */
-	const VERSION = "1.1.0";
+	const VERSION = "1.2.0";
 
 	/**
 	 * Plugin domain.
@@ -74,6 +75,11 @@ class Triibo_Fast_Shop
 
 				add_filter( "plugin_action_links_" . plugin_basename( __FILE__ ), [ $this, "plugin_action_links" ]        );
 				add_filter( "woocommerce_rest_suppress_image_upload_error",       [ $this, "image_upload_error"  ], 10, 4 );
+
+				/**
+				 * @since 1.2.0
+				 */
+				add_filter( "plugin_row_meta",                                    [ $this, "plugin_row_meta"     ], 10, 3 );
 
 				add_action( "admin_menu",                         [ $this, "add_submenu_page"         ], 11    );
 				add_action( "triibo_api_service_add_button",      [ $this, "add_btn"                  ], 11    );
@@ -587,6 +593,38 @@ class Triibo_Fast_Shop
 	public function image_upload_error( $false, $upload, $product_get_id, $images )
 	{
 		return true;
+	}
+
+	/**
+	 * Add link to changelog modal
+	 *
+	 * @since 	1.2.0
+	 * @param 	array 	$plugin_meta
+	 * @param 	string 	$plugin_file
+	 * @param 	array 	$plugin_data
+	 * @return 	array
+	 */
+	public function plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data )
+	{
+		$path = path_join( WP_PLUGIN_DIR, $plugin_file );
+
+		if ( DIRECTORY_SEPARATOR == "\\" )
+			$path = str_replace( "/", "\\", $path );
+
+        if ( __FILE__ === $path )
+		{
+            $url = plugins_url( "readme.txt", __FILE__ );
+
+            $plugin_meta[] = sprintf(
+                "<a href='%s' class='thickbox open-plugin-details-modal' aria-label='%s' data-title='%s'>%s</a>",
+                add_query_arg( "TB_iframe", "true", $url ),
+                esc_attr( sprintf( __( "More information about %s" ), $plugin_data[ "Name" ] ) ),
+                esc_attr( $plugin_data[ "Name" ] ),
+                __( "Histórico de alterações" )
+            );
+        }
+
+        return $plugin_meta;
 	}
 
 	/**
