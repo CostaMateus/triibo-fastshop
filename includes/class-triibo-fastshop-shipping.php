@@ -205,7 +205,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         if ( $shipping[ "errorCode" ] )
         {
-            $this->log( "calculate_shipping_error", $shipping );
+            $this->log( "calculate_shipping_error: " . json_encode( $shipping ) );
             return;
         }
 
