@@ -251,7 +251,8 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 	/**
 	 * Get shipping rate.
 	 *
-     * @since   1.3.0 Added more FS HUBs
+     * @since   1.4.0 Added more FS HUBs (19, 74)
+     * @since   1.3.0 Added more FS HUBs (4E, 25, 60, 61)
      * @since   1.0.0
 	 * @param   array $package Cart package.
 	 * @return  SimpleXMLElement|null
@@ -283,6 +284,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             $fs_25   = $this->api->env() ? 1    : 4741;
             $fs_60   = $this->api->env() ? 1    : 4742;
             $fs_61   = $this->api->env() ? 1    : 4743;
+
+            $fs_19   = $this->api->env() ? 1    : 4745;
+            $fs_74   = $this->api->env() ? 1    : 4746;
 
             if ( in_array( $code, [ 4001, 4002 ] ) )
             {
@@ -346,6 +350,14 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
                         case "61":
                             $id = $fs_61;
+                        break;
+
+                        case "19":
+                            $id = $fs_19;
+                        break;
+
+                        case "74":
+                            $id = $fs_74;
                         break;
 
                         default:
