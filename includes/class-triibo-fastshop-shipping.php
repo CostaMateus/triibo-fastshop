@@ -327,60 +327,25 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
                 if ( $hub != "-" )
                 {
-                    switch ( explode( "_", $hub )[ 2 ] )
-                    {
-                        case "05":
-                            $id = $fs_05;
-                        break;
+                    $last_p  = explode( "_", $hub )[ 2 ];
 
-                        case "14":
-                            $id = $fs_14;
-                        break;
+                    $hub_map = [
+                        "05" => $fs_05,
+                        "14" => $fs_14,
+                        "33" => $fs_33,
+                        "4E" => $fs_4e,
+                        "25" => $fs_25,
+                        "60" => $fs_60,
+                        "61" => $fs_61,
+                        "19" => $fs_19,
+                        "74" => $fs_74,
+                        "3E" => $fs_3e,
+                        "97" => $fs_97
+                    ];
 
-                        case "33":
-                            $id = $fs_33;
-                        break;
+                    $id      = $hub_map[ strtoupper( $last_p ) ] ?? $fs_undf;
 
-                        case "4e":
-                        case "4E":
-                            $id = $fs_4e;
-                        break;
-
-                        case "25":
-                            $id = $fs_25;
-                        break;
-
-                        case "60":
-                            $id = $fs_60;
-                        break;
-
-                        case "61":
-                            $id = $fs_61;
-                        break;
-
-                        case "19":
-                            $id = $fs_19;
-                        break;
-
-                        case "74":
-                            $id = $fs_74;
-                        break;
-
-                        case "3e":
-                        case "3E":
-                            $id = $fs_3e;
-                        break;
-
-                        case "97":
-                            $id = $fs_97;
-                        break;
-
-                        default:
-                            $id = $fs_undf;
-                        break;
-                    }
-
-                    $product->set_shipping_class_id( $id  );
+                    $product->set_shipping_class_id( $id );
                 }
                 else
                 {
