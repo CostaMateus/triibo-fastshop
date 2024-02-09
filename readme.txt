@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 1.5.0 - 2024/02/09 =
+
+- Adiciona HUBs de entrega da Fast Shop (97)
+
 = 1.4.0 - 2024/01/23 =
 
 - Adiciona HUBs de entrega da Fast Shop (19 e 74)
