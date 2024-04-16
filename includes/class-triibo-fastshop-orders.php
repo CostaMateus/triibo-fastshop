@@ -181,34 +181,6 @@ class Triibo_Fast_Shop_Orders
                 $message  = ( $response[ "success" ] )
                             ? "Successfully cancelled: #" . $data[ "data" ][ "orderId" ]
                             : "Error on canceling #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
-
-                // /**
-                //  * Add retry logic
-                //  *
-                //  * @since 1.1.0
-                //  */
-                // $retry = 0;
-
-                // do
-                // {
-
-                //     if ( !$response[ "success" ] )
-                //     {
-                //         // 4001 erro na FS
-                //         // 4002 pedido sem ID fastshop
-                //         if ( $data[ "errorCode" ] == "4001" )
-                //         {
-                //             $retry = 3;
-                //         }
-                //         else
-                //         {
-                //             $retry++;
-                //             sleep( 5 );
-                //         }
-                //     }
-                // }
-                // while ( $retry < 3 || !$response[ "success" ] );
-
             break;
         }
 
