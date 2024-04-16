@@ -314,8 +314,6 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             }
             else
             {
-                $item    = $data[ "data" ];
-
                 $stock   = $item[ "stock" ];
                 $product->set_stock_quantity( $stock );
 
