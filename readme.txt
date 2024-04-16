@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 1.6.1 - 2024/04/16 =
+
+- Adiciona log com nome de usuário que aprova pedido da Fast Shop
+
 = 1.6.0 - 2024/02/09 =
 
 - Adiciona HUBs de entrega da Fast Shop (97)
