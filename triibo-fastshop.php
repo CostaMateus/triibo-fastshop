@@ -5,7 +5,7 @@
  * Description: 			Comunicação entre MKT, Integração e FastShop. Dependências: Triibo API Services e WooCommerce.
  * Author: 					Mateus Costa
  * Author URI: 				https://costamateus.com.br/
- * Version: 				1.6.1
+ * Version: 				1.6.2
  * Text Domain: 			triibo_fast_shop
  * Requires PHP: 			7.4
  * Requires at least: 		6.0
@@ -14,7 +14,7 @@
  * WC tested up to: 		8.1
  *
  * @package 	Triibo_Fast_Shop
- * @version 	1.6.1
+ * @version 	1.6.2
  */
 defined( "ABSPATH" ) || exit;
 
@@ -28,7 +28,7 @@ class Triibo_Fast_Shop
      * @since   1.0.0
 	 * @var 	string
 	 */
-	const VERSION = "1.6.1";
+	const VERSION = "1.6.2";
 
 	/**
 	 * Plugin domain.

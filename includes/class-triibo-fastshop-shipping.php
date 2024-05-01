@@ -251,6 +251,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 	/**
 	 * Get shipping rate.
 	 *
+     * @since   1.6.2 Added more FS HUBs (83)
      * @since   1.6.0 Added more FS HUBs (97)
      * @since   1.5.0 Added more FS HUBs (3E)
      * @since   1.4.0 Added more FS HUBs (19, 74)
@@ -293,6 +294,8 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             $fs_3e   = $this->api->env() ? 1    : 4747;
 
             $fs_97   = $this->api->env() ? 1    : 4759;
+
+            $fs_83   = $this->api->env() ? 1    : 4776;
 
             if ( in_array( $code, [ 4001, 4002 ] ) )
             {
@@ -338,7 +341,8 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
                         "19" => $fs_19,
                         "74" => $fs_74,
                         "3E" => $fs_3e,
-                        "97" => $fs_97
+                        "97" => $fs_97,
+                        "83" => $fs_83
                     ];
 
                     $id      = $hub_map[ strtoupper( $last_p ) ] ?? $fs_undf;
