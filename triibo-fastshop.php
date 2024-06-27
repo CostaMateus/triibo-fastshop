@@ -5,16 +5,15 @@
  * Description: 			Comunicação entre MKT, Integração e FastShop. Dependências: Triibo API Services e WooCommerce.
  * Author: 					Mateus Costa
  * Author URI: 				https://costamateus.com.br/
- * Version: 				1.6.2
+ * Version: 				1.7.0
  * Text Domain: 			triibo_fast_shop
+ * Requires at least: 		6.4
  * Requires PHP: 			7.4
- * Requires at least: 		6.0
- * Tested up to: 			6.3
- * WC requires at least: 	6.5
- * WC tested up to: 		8.1
+ * WC requires at least: 	8.0
+ * WC tested up to: 		8.2
  *
  * @package 	Triibo_Fast_Shop
- * @version 	1.6.2
+ * @version 	1.7.0
  */
 defined( "ABSPATH" ) || exit;
 
@@ -28,7 +27,7 @@ class Triibo_Fast_Shop
      * @since   1.0.0
 	 * @var 	string
 	 */
-	const VERSION = "1.6.2";
+	const VERSION = "1.7.0";
 
 	/**
 	 * Plugin domain.
@@ -62,6 +61,8 @@ class Triibo_Fast_Shop
 	/**
 	 * Constructor
 	 *
+	 * @since 	1.7.0 	Added HPOS compatibility declaration
+	 * @since 	1.2.0 	Added plugin change history
 	 * @since 	1.0.0
 	 */
 	private function __construct()
@@ -70,6 +71,11 @@ class Triibo_Fast_Shop
 		{
 			if ( class_exists( "WooCommerce" ) )
 			{
+				/**
+				 * @since 1.7.0
+				 */
+				add_action( "before_woocommerce_init", [ $this, "setup_hpos_compatibility" ] );
+
 				// Order Class
 				include_once dirname( __FILE__ ) . "/includes/class-triibo-fastshop-orders.php";
 				// Shipping Class
@@ -133,6 +139,27 @@ class Triibo_Fast_Shop
 	public static function triibo_api_services_missing_notice()
 	{
 		include_once dirname( __FILE__ ) . "/includes/admin/views/html-notice-missing-triibo_api_services.php";
+	}
+
+	/**
+	 * Setup WooCommerce HPOS compatibility.
+	 *
+	 * @since 	1.7.0
+	 * @return 	void
+	 */
+	public function setup_hpos_compatibility() : void
+	{
+		if ( defined( "WC_VERSION" ) && version_compare( WC_VERSION, "7.1", "<" ) )
+			return;
+
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) )
+		{
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+				"custom_order_tables",
+				__FILE__,
+				true
+			);
+		}
 	}
 
 	/**
@@ -654,7 +681,7 @@ class Triibo_Fast_Shop
 	{
 		global $theorder;
 
-		if ( $this->is_only_fs( $theorder ) && $theorder->has_status( "processing" ) && !get_post_meta( $theorder->id, "_fs_orderapproved", true ) )
+		if ( $this->is_only_fs( $theorder ) && $theorder->has_status( "processing" ) && !$theorder->get_meta( "_fs_orderapproved", true ) )
 		{
 			$actions[ "wc_fastshop_order_action" ] = __( "Aprovar na Fast Shop", self::DOMAIN );
 
