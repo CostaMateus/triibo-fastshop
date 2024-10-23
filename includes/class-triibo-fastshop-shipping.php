@@ -13,13 +13,49 @@ defined( "ABSPATH" ) || exit;
  */
 class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 {
-    const ID                      = "fastshop-shipping";
-    const DOMAIN                  = Triibo_Fast_Shop::DOMAIN . "_shipping";
-    protected $api                = null;
-    protected $log                = null;
-    protected $additional_time    = null;
-    protected $shipping_class_id  = null;
-    protected $show_delivery_time = null;
+    const ID     = "triibo-fast-shop-shipping";
+    const DOMAIN = Triibo_Fast_Shop::DOMAIN . "_shipping";
+    const SELLER = "fast_shop";
+
+    /**
+     * Instance ID.
+     *
+     * @since   2.0.0
+     * @var     string
+     */
+    public $id;
+
+    /**
+     * API.
+     *
+     * @since   2.0.0
+     * @var     Triibo_Api_Php
+     */
+    protected $api;
+
+    /**
+     * Additional time.
+     *
+     * @since   2.0.0
+     * @var     string
+     */
+    protected $additional_time;
+
+    /**
+     * Shipping classes ID.
+     *
+     * @since   2.0.0
+     * @var     array
+     */
+    protected $shipping_class_id;
+
+    /**
+     * Shows delivery time.
+     *
+     * @since   2.0.0
+     * @var     string
+     */
+    protected $show_delivery_time;
 
     /**
      * Initialize the Correios shipping method.
@@ -30,12 +66,11 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
      */
     public function __construct( $instance_id = 0 )
     {
+        $this->id                 = self::ID;
         $this->api                = new Triibo_Api_Php();
-        $this->log                = ( function_exists( "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
 
         $this->instance_id        = absint( $instance_id );
 
-        $this->id                 = self::ID;
         $this->method_title       = __( "Fast Shop",                    self::DOMAIN );
         $this->method_description = __( "Entrega feita pela Fast Shop", self::DOMAIN );
 
@@ -65,11 +100,11 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
         $this->init_form_fields();
 
         // Define user set variables.
-        $this->enabled            = $this->get_option( "enabled"                );
-        $this->title              = $this->get_option( "title"                  );
-        $this->shipping_class_id  = $this->get_option( "shipping_class_id", "0" );
-        $this->show_delivery_time = $this->get_option( "show_delivery_time"     );
-        $this->additional_time    = $this->get_option( "additional_time"        );
+        $this->enabled            = $this->get_option( "enabled"            );
+        $this->title              = $this->get_option( "title"              );
+        $this->additional_time    = $this->get_option( "additional_time"    );
+        $this->show_delivery_time = $this->get_option( "show_delivery_time" );
+        $this->shipping_class_id  = $this->get_option( "shipping_class_id", [ "0" ] );
 
         // Save settings in admin if you have any defined
         add_action( "woocommerce_update_options_shipping_" . $this->id, [ $this, "process_admin_options" ] );
@@ -164,7 +199,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         foreach ( $package[ "contents" ] as $item_id => $values )
         {
-            $product = $values[ "data" ];
+            $product = $values[ "data"     ];
             $qty     = $values[ "quantity" ];
 
             if ( $qty > 0 && $product->needs_shipping() )
@@ -185,27 +220,28 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
      *
      * @since   1.0.0
      * @access  public
-     * @param   mixed $package
+     * @param   mixed   $package
      * @return  void
      */
     public function calculate_shipping( $package = [] )
     {
-        // Check if valid to be calculeted
         if ( "" === $package[ "destination" ][ "postcode" ] || "BR" !== $package[ "destination" ][ "country" ] ) return;
 
-        // Check if complete postcode
-        $postcode = strlen($package[ "destination" ][ "postcode" ] );
+        $postcode = strlen( $package[ "destination" ][ "postcode" ] );
         if ( $postcode < 8 || $postcode > 9 ) return;
 
-        // Check for shipping classes.
-        if ( ! $this->has_only_selected_shipping_class( $package ) ) return;
+        if ( !$this->has_only_selected_shipping_class( $package ) ) return;
 
-        // executa a consulta a api
         $shipping = $this->get_rate( $package );
 
-        if ( $shipping[ "errorCode" ] )
+        if ( $shipping[ "errorCode" ] !== null )
         {
-            $this->log( "calculate_shipping_error: " . json_encode( $shipping ) );
+			$this->log( "error", json_encode( [
+                "function" => "calculate_shipping_error",
+                "package"  => $package,
+                "return"   => $shipping,
+            ] ), true );
+
             return;
         }
 
@@ -215,15 +251,16 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         foreach ( $shipping[ "data" ] as $data )
         {
-            if ( $data[ "errorCode" ] ) return;
+            if ( $data[ "errorCode" ] !== null )
+                return;
 
-            $item         = $data[ "data" ];
+            $item         = $data[ "data"       ];
             $id           = $item[ "product_id" ];
-            $costs[ $id ] = ( float ) $item[ "deliveryPrice" ];
-            $time         = ( $item[ "deliveryTime" ] > $time ) ? $item[ "deliveryTime" ] : $time;
+
+            $costs[ $id ] = ( float ) $item[ "delivery_price" ];
+            $time         = ( $item[ "delivery_time" ] > $time ) ? $item[ "delivery_time" ] : $time;
         }
 
-        // Display delivery
         if ( "yes" === $this->show_delivery_time )
         {
             $meta = [
@@ -234,7 +271,6 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
         $meta[ "price"   ] = $costs;
         $meta[ "company" ] = "Fast Shop";
 
-        // Create the rate
         $rate = [
             "id"        => $this->id . $this->instance_id,
             "label"     => $this->title,
@@ -244,13 +280,13 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             "package"   => $package
         ];
 
-        // Register the rate
         $this->add_rate( $rate );
     }
 
 	/**
 	 * Get shipping rate.
 	 *
+     * @since   2.0.0 New api FS/Vtex
      * @since   1.6.2 Added more FS HUBs (83)
      * @since   1.6.0 Added more FS HUBs (97)
      * @since   1.5.0 Added more FS HUBs (3E)
@@ -263,95 +299,64 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 	protected function get_rate( $package )
     {
         $body     = $this->process_package( $package );
-        $shipping = $this->api->fs_freight_calculation( $body )[ "data" ];
+        $response = $this->api->freight_calculation( $body, self::SELLER );
 
-        $this->log( json_encode( $shipping ) );
+        if ( $response[ "code" ] !== 200 )
+        {
+            $this->log( "critical", print_r( $response, true ), true );
+
+            $response[ "errorCode" ] = $response[ "code" ];
+
+            return $response;
+        }
+
+        $shipping = $response[ "data" ];
 
         foreach ( $shipping[ "data" ] as $sku => &$data )
         {
-            $id      = wc_get_product_id_by_sku( $sku );
-            $product = wc_get_product( $id );
-            $data[ "data" ][ "product_id" ] = $id;
+            $product_id = wc_get_product_id_by_sku( $sku );
+            $product    = wc_get_product( $product_id );
 
-            $code    = $data[ "errorCode" ];
-            $item    = $data[ "data"      ];
+            $code       = $data[ "errorCode" ];
+            $item       = $data[ "data"      ];
 
-            $fs_undf = $this->api->env() ? 1    : 4744;
-
-            $fs_     = $this->api->env() ? 4453 : 3970;
-            $fs_05   = $this->api->env() ? 4454 : 4309;
-            $fs_14   = $this->api->env() ? 4451 : 4310;
-            $fs_33   = $this->api->env() ? 4345 : 4311;
-
-            $fs_4e   = $this->api->env() ? 1    : 4740;
-            $fs_25   = $this->api->env() ? 1    : 4741;
-            $fs_60   = $this->api->env() ? 1    : 4742;
-            $fs_61   = $this->api->env() ? 1    : 4743;
-
-            $fs_19   = $this->api->env() ? 1    : 4745;
-            $fs_74   = $this->api->env() ? 1    : 4746;
-
-            $fs_3e   = $this->api->env() ? 1    : 4747;
-
-            $fs_97   = $this->api->env() ? 1    : 4759;
-
-            $fs_83   = $this->api->env() ? 1    : 4776;
-
-            if ( in_array( $code, [ 4001, 4002 ] ) )
+            if ( get_home_url() === "http://shopkeeper.local" )
             {
-                $product->set_stock_quantity( 0 );
-                $product->set_stock_status( "outofstock" );
-                $product->update_meta_data( "_fastshop_hub", "-" );
-                $product->set_shipping_class_id( $fs_ );
-            }
-            else if ( $code == 4000 )
-            {
-                $stock   = $item[ "stock" ];
-                $product->set_stock_quantity( $stock );
-
-                $status  = ( $stock > 0 ) ? "instock" : "outofstock";
-                $product->set_stock_status( $status );
-
-                $product->update_meta_data( "_fastshop_hub", "-" );
-                $product->set_shipping_class_id( $fs_ );
+                $fs_undefined = 153;
+                $fs_default   = 154;
+                $fs_normal    = 155;
             }
             else
             {
-                $stock   = $item[ "stock" ];
-                $product->set_stock_quantity( $stock );
+                $fs_undefined = $this->api->env() ? 4744 : 4744;
+                $fs_default   = $this->api->env() ? 3970 : 3970;
+                $fs_normal    = $this->api->env() ? 4824 : 4824;
+            }
 
-                $status  = ( $stock > 0 ) ? "instock" : "outofstock";
-                $product->set_stock_status( $status );
+            $status     = $item[ "availability" ] ? "instock" : "outofstock";
+            $product->set_stock_status( $status );
 
-                $hub     = !empty( $item[ "hub" ] ) ? $item[ "hub" ] : "-";
+            if ( in_array( $code, [ 4000, 4001 ] ) )
+            {
+                $product->update_meta_data( "_fastshop_hub", "-" );
+                $product->set_shipping_class_id( $fs_default );
+            }
+            else
+            {
+                $hub = !empty( $item[ "hub" ] ) ? $item[ "hub" ] : "-";
                 $product->update_meta_data( "_fastshop_hub", $hub );
 
                 if ( $hub != "-" )
                 {
-                    $last_p  = explode( "_", $hub )[ 2 ];
+                    $hub_map = [ "normal" => $fs_normal ];
 
-                    $hub_map = [
-                        "05" => $fs_05,
-                        "14" => $fs_14,
-                        "33" => $fs_33,
-                        "4E" => $fs_4e,
-                        "25" => $fs_25,
-                        "60" => $fs_60,
-                        "61" => $fs_61,
-                        "19" => $fs_19,
-                        "74" => $fs_74,
-                        "3E" => $fs_3e,
-                        "97" => $fs_97,
-                        "83" => $fs_83
-                    ];
+                    $hub_id  = $hub_map[ $hub ] ?? $fs_undefined;
 
-                    $id      = $hub_map[ strtoupper( $last_p ) ] ?? $fs_undf;
-
-                    $product->set_shipping_class_id( $id );
+                    $product->set_shipping_class_id( $hub_id );
                 }
                 else
                 {
-                    $product->set_shipping_class_id( $fs_ );
+                    $product->set_shipping_class_id( $fs_default );
                 }
             }
 
@@ -360,6 +365,8 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
                 $product->set_regular_price( $item[ "regular_price" ] );
                 $product->set_sale_price( $item[ "sale_price" ] );
             }
+
+            $data[ "data" ][ "product_id" ] = $product_id;
 
             $product->save();
         }
@@ -370,6 +377,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Process the package
      *
+     * @since   2.0.0 New api FS/Vtex
      * @since   1.0.0
      * @param   array $package
      * @return  array
@@ -381,10 +389,13 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         foreach ( $package[ "contents" ] as $content )
         {
-            $product = wc_get_product( $content[ "product_id" ] );
-            $items[] = [
-                "sku"      => $product->get_sku(),
-                "quantity" => $content["quantity"]
+            $product       = wc_get_product( $content[ "product_id" ] );
+            $fs_product_id = $product->get_meta( "_fs_product_id" );
+
+            $items[]       = [
+                "sku"        => $product->get_sku(),
+                "product_id" => $fs_product_id,
+                "quantity"   => $content[ "quantity" ]
             ];
         }
 
@@ -397,12 +408,18 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Register log
      *
+     * @since   2.0.0   Reworked log function.
      * @since   1.0.0
-     * @param   string $data
+     * @param   string  $data
      * @return  void
      */
-    public function log( string $data )
+    public function log( string $level, string $message, bool $is_error = false )
     {
-        $this->log->add( self::DOMAIN, $data );
-    }
+		$logger  = ( function_exists( "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
+
+		$context = [ "source" => $this->id ];
+
+		if ( $is_error || $this->api->env() === true )
+			$logger->$level( $message, $context );
+	}
 }
