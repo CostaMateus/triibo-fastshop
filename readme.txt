@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 2.0.0 - 2024/10/22 =
+
+- Novas APIs de integração FS/Vtex
+
 = 1.7.0 - 2024/06/27 =
 
 - Adicionada compatibilidade com WooCommerce HPOS
