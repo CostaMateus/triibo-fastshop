@@ -13,10 +13,10 @@ defined( "ABSPATH" ) || exit;
  */
 class Triibo_Fast_Shop_Orders
 {
-    const ID            = Triibo_Fast_Shop::DOMAIN . "_orders";
+    const ID     = "triibo-fast-shop-orders";
+    const SELLER = "fast_shop";
 
     private $api        = null;
-    private $log        = null;
     private $type       = null;
 
     private $order_id   = null;
@@ -31,9 +31,9 @@ class Triibo_Fast_Shop_Orders
 	 */
 	public function __construct( $order_id = null, $old_status = null, $new_status = null )
     {
-        $this->api = new Triibo_Api_Php();
+        $this->id  = self::ID;
 
-        $this->log = ( function_exists( "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
+        $this->api = new Triibo_Api_Php();
 
         if ( $order_id && $old_status && $new_status )
         {
@@ -138,58 +138,55 @@ class Triibo_Fast_Shop_Orders
     {
         $status = get_option( "triibo_fast_shop_fs_status" );
 
-        if ( $status != "on"  )
+        if ( $status != "on" )
         {
             $url = esc_url( admin_url( "admin.php?page=" . Triibo_Fast_Shop::DOMAIN . "-settings" ) );
-            $this->log( "Order notification is disabled. Enable in this link: {$url}" );
+            $this->log( "info", "Order notification is disabled. Enable in this link: {$url}", true );
             return;
         }
 
         if ( !$this->type )
         {
-            $this->log( "This changing of status is not mapped: {$this->old_status} >> {$this->new_status}" );
+            $this->log( "info", "This changing of status is not mapped: {$this->old_status} >> {$this->new_status}", true );
             return;
         }
 
         switch ( $this->type )
         {
             case "ordercreation":
-                $this->log( "Creating order FS: #{$this->order_id}" );
-                $response = $this->api->fs_order_creation( $this->order_id );
-                $data     = $response[ "data" ];
-                $errCode  = $data[ "errorCode" ];
-                $message  = ( $response[ "success" ] )
-                            ? "Successfully created: #" . $data[ "data" ][ "orderId" ]
-                            : "Error on creating #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
+                $this->log( "info", "Creating order FS: #{$this->order_id}" );
+                $response   = $this->api->fs_order_creation( $this->order_id, self::SELLER );
+                $error_code = $response[ "data" ][ "error_code" ];
+                $message    = ( $response[ "success" ] )
+                                ? "Successfully created: #{$this->order_id}"
+                                : "Error on creating #{$this->order_id} | " . "{$error_code} {$response[ "data" ][ "message" ]}";
             break;
 
             case "orderapproved":
-                $this->log( "Approving order FS: #{$this->order_id}" );
-                $response = $this->api->fs_order_approved( $this->order_id );
-                $data     = $response[ "data" ];
-                $errCode  = $data[ "errorCode" ];
-                $message  = ( $response[ "success" ] )
-                            ? "Successfully approved: #" . $data[ "data" ][ "orderId" ]
-                            : "Error on approving #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
+                $this->log( "info", "Approving order FS: #{$this->order_id}" );
+                $response   = $this->api->fs_order_approved( $this->order_id, self::SELLER );
+                $error_code = $response[ "data" ][ "error_code" ];
+                $message    = ( $response[ "success" ] )
+                                ? "Successfully approved: #{$this->order_id}"
+                                : "Error on approving #{$this->order_id} | " . "{$error_code} {$response[ "data" ][ "message" ]}";
             break;
 
             case "ordercancelation":
-                $this->log( "Canceling order FS: #{$this->order_id}" );
-                $response = $this->api->fs_order_cancelation( $this->order_id );
-                $data     = $response[ "data" ];
-                $errCode  = $data[ "errorCode" ];
-                $message  = ( $response[ "success" ] )
-                            ? "Successfully cancelled: #" . $data[ "data" ][ "orderId" ]
-                            : "Error on canceling #{$this->order_id} | " . "{$data[ "errorCode" ]} {$data[ "message" ]}";
+                $this->log( "info", "Canceling order FS: #{$this->order_id}" );
+                $response   = $this->api->fs_order_cancelation( $this->order_id, self::SELLER );
+                $error_code = $response[ "data" ][ "error_code" ];
+                $message    = ( $response[ "success" ] )
+                                ? "Successfully cancelled: #{$this->order_id}"
+                                : "Error on canceling #{$this->order_id} | " . "{$error_code} {$response[ "data" ][ "message" ]}";
             break;
         }
 
-        $this->log( $message );
+        $this->log( "info", $message );
 
         return [
-            "success"   => $response[ "success" ],
-            "message"   => $message,
-            "errorCode" => $errCode
+            "error_code" => $error_code,
+            "success"    => $response[ "success" ],
+            "message"    => $message,
         ];
     }
 
@@ -201,7 +198,7 @@ class Triibo_Fast_Shop_Orders
      */
     public function maybe_split_orders( $parent_order_id, $parent_order )
     {
-        $this->log( sprintf( "TRIIBO: New Order #%d created. Init sub order.", $parent_order_id ) );
+        $this->log( "info", sprintf( "TRIIBO: New Order #%d created. Init sub order.", $parent_order_id ) );
 
         if ( $parent_order->get_meta( "has_sub_order" ) == true )
         {
@@ -235,14 +232,14 @@ class Triibo_Fast_Shop_Orders
 
         if ( count( $hubs ) <= 1 )
         {
-            $this->log( "TRIIBO: 1 hub only, skipping sub order" );
+            $this->log( "info", "TRIIBO: 1 hub only, skipping sub order" );
             return;
         }
 
         $parent_order->update_meta_data( "has_sub_order", true );
         $parent_order->save();
 
-        $this->log( sprintf( "TRIIBO: Got %s hubs, starting sub order", count( $hubs ) ) );
+        $this->log( "info", sprintf( "TRIIBO: Got %s hubs, starting sub order", count( $hubs ) ) );
 
         foreach ( $hubs as $hub => $hub_products )
         {
@@ -258,7 +255,7 @@ class Triibo_Fast_Shop_Orders
      */
     private function create_sub_order( $parent_order, $seller_id, $hub, $hub_products )
     {
-        $this->log( "TRIIBO: Creating sub order for hub: " . $hub );
+        $this->log( "info", "TRIIBO: Creating sub order for hub: " . $hub );
 
         $bill_ship = [
             "billing_country",
@@ -325,7 +322,7 @@ class Triibo_Fast_Shop_Orders
 
             $order_id = $order->save();
 
-            $this->log( "TRIIBO: Created sub order : #" . $order_id );
+            $this->log( "info", "TRIIBO: Created sub order : #" . $order_id );
 
             // update total_sales count for sub-order
             wc_update_total_sales_counts( $order_id );
@@ -383,7 +380,7 @@ class Triibo_Fast_Shop_Orders
 
         if ( !$shipping_methods )
         {
-            $this->log( "TRIIBO: No shipping method found : Aborting : #" . $order->get_id() );
+            $this->log( "info", "TRIIBO: No shipping method found : Aborting : #" . $order->get_id() );
             return;
         }
 
@@ -526,11 +523,18 @@ class Triibo_Fast_Shop_Orders
     /**
      * Register log
      *
-     * @param   string $data
+     * @since   2.0.0   Reworked log function.
+     * @since   1.0.0
+     * @param   string  $data
      * @return  void
      */
-    public function log( string $data )
+    public function log( string $level, string $message, bool $is_error = false )
     {
-        $this->log->add( self::ID, $data );
-    }
+		$logger  = ( function_exists( "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
+
+		$context = [ "source" => $this->id ];
+
+		if ( $is_error || $this->api->env() === true )
+			$logger->$level( $message, $context );
+	}
 }
