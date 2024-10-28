@@ -164,7 +164,7 @@ class Triibo_Fast_Shop_Orders
 
             case "orderapproved":
                 $this->log( "info", "Approving order FS: #{$this->order_id}" );
-                $response   = $this->api->order_approved( $this->order_id, self::SELLER );
+                $response   = $this->api->order_approval( $this->order_id, self::SELLER );
                 $error_code = $response[ "data" ][ "error_code" ];
                 $message    = ( $response[ "success" ] )
                                 ? "Successfully approved: #{$this->order_id}"
