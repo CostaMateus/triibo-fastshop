@@ -38,6 +38,14 @@ class Triibo_Fast_Shop
 	const DOMAIN  = "triibo_fast_shop";
 
 	/**
+	 * Seller ID.
+	 *
+     * @since   2.0.0
+	 * @var 	string
+	 */
+    const SELLER = "fast_shop";
+
+	/**
 	 * Instance of this class.
 	 *
      * @since   1.0.0
@@ -269,7 +277,7 @@ class Triibo_Fast_Shop
 			try
 			{
 				$api = new Triibo_Api_Php();
-				$api->fs_update_sku( $sku );
+				$api->update_sku( $sku, self::SELLER );
 			}
 			catch ( Exception $e )
 			{
