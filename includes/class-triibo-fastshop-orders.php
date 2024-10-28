@@ -173,7 +173,7 @@ class Triibo_Fast_Shop_Orders
 
             case "ordercancelation":
                 $this->log( "info", "Canceling order FS: #{$this->order_id}" );
-                $response   = $this->api->order_cancelation( $this->order_id, self::SELLER );
+                $response   = $this->api->order_cancellation( $this->order_id, self::SELLER );
                 $error_code = $response[ "data" ][ "error_code" ];
                 $message    = ( $response[ "success" ] )
                                 ? "Successfully cancelled: #{$this->order_id}"
