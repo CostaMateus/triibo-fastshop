@@ -714,7 +714,6 @@ class Triibo_Fast_Shop
 			$api->log( "info", "Manually approved by: {$user_name}" );
 
 			$order->add_order_note( "Pedido aprovado manualmente na FS por: {$user_name}" );
-			update_post_meta( $order->id, "_fs_orderapproved", "yes" );
 		}
 		else
 		{
