@@ -681,7 +681,7 @@ class Triibo_Fast_Shop
 	{
 		global $theorder;
 
-		if ( $this->is_only_fs( $theorder ) && $theorder->has_status( "processing" ) && !$theorder->get_meta( "_fs_orderapproved", true ) )
+		if ( $this->is_only_fs( $theorder ) && $theorder->has_status( "processing" ) && !$theorder->get_meta( "_fastshop_order_approved", true ) )
 		{
 			$actions[ "wc_fastshop_order_action" ] = __( "Aprovar na Fast Shop", self::DOMAIN );
 
