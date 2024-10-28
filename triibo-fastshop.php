@@ -274,7 +274,7 @@ class Triibo_Fast_Shop
 			catch ( Exception $e )
 			{
 				$log = ( function_exists( "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
-				$log->add( "fastshop-shipping", $e->getMessage() );
+				$log->add( "triibo-fast-shop-shipping", $e->getMessage() );
 			}
         }
 
@@ -703,7 +703,7 @@ class Triibo_Fast_Shop
 			 *
 			 * @since 	1.6.1
 			 */
-			$api->log( "Manually approved by: {$user_name}" );
+			$api->log( "info", "Manually approved by: {$user_name}" );
 
 			$order->add_order_note( "Pedido aprovado manualmente na FS por: {$user_name}" );
 			update_post_meta( $order->id, "_fs_orderapproved", "yes" );
