@@ -155,7 +155,7 @@ class Triibo_Fast_Shop_Orders
         {
             case "ordercreation":
                 $this->log( "info", "Creating order FS: #{$this->order_id}" );
-                $response   = $this->api->fs_order_creation( $this->order_id, self::SELLER );
+                $response   = $this->api->order_creation( $this->order_id, self::SELLER );
                 $error_code = $response[ "data" ][ "error_code" ];
                 $message    = ( $response[ "success" ] )
                                 ? "Successfully created: #{$this->order_id}"
@@ -164,7 +164,7 @@ class Triibo_Fast_Shop_Orders
 
             case "orderapproved":
                 $this->log( "info", "Approving order FS: #{$this->order_id}" );
-                $response   = $this->api->fs_order_approved( $this->order_id, self::SELLER );
+                $response   = $this->api->order_approved( $this->order_id, self::SELLER );
                 $error_code = $response[ "data" ][ "error_code" ];
                 $message    = ( $response[ "success" ] )
                                 ? "Successfully approved: #{$this->order_id}"
@@ -173,7 +173,7 @@ class Triibo_Fast_Shop_Orders
 
             case "ordercancelation":
                 $this->log( "info", "Canceling order FS: #{$this->order_id}" );
-                $response   = $this->api->fs_order_cancelation( $this->order_id, self::SELLER );
+                $response   = $this->api->order_cancelation( $this->order_id, self::SELLER );
                 $error_code = $response[ "data" ][ "error_code" ];
                 $message    = ( $response[ "success" ] )
                                 ? "Successfully cancelled: #{$this->order_id}"
