@@ -234,7 +234,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         $shipping = $this->get_rate( $package );
 
-        if ( $shipping[ "errorCode" ] !== null )
+        if ( $shipping[ "error_code" ] !== null )
         {
 			$this->log( "error", json_encode( [
                 "function" => "calculate_shipping_error",
@@ -251,7 +251,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         foreach ( $shipping[ "data" ] as $data )
         {
-            if ( $data[ "errorCode" ] !== null )
+            if ( $data[ "error_code" ] !== null )
                 return;
 
             $item         = $data[ "data"       ];
@@ -305,7 +305,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
         {
             $this->log( "critical", print_r( $response, true ), true );
 
-            $response[ "errorCode" ] = $response[ "code" ];
+            $response[ "error_code" ] = $response[ "code" ];
 
             return $response;
         }
@@ -317,8 +317,8 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             $product_id = wc_get_product_id_by_sku( $sku );
             $product    = wc_get_product( $product_id );
 
-            $code       = $data[ "errorCode" ];
-            $item       = $data[ "data"      ];
+            $code       = $data[ "error_code" ];
+            $item       = $data[ "data"       ];
 
             if ( get_home_url() === "http://shopkeeper.local" )
             {
