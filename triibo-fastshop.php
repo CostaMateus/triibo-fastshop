@@ -89,6 +89,11 @@ class Triibo_Fast_Shop
 				 */
 				add_filter( "plugin_row_meta",                                    [ $this, "plugin_row_meta"     ], 10, 3 );
 
+				/**
+				 * @since 2.0.0
+				 */
+				add_action( "woocommerce_rest_prepare_shop_order_object",         [ $this, "add_vtex_meta_data"  ], 10, 3 );
+
 				add_action( "admin_menu",                         [ $this, "add_submenu_page"         ], 11    );
 				add_action( "triibo_api_service_add_button",      [ $this, "add_btn"                  ], 11    );
 				add_action( "triibo_api_service_list_plugin_php", [ $this, "add_info_dependency"      ],       );
@@ -97,7 +102,6 @@ class Triibo_Fast_Shop
 				add_action( "woocommerce_add_to_cart",            [ $this, "add_to_cart_update_stock" ], 10, 6 );
 
 				// Order Actions
-				// add_action( "woocommerce_thankyou",               [ $this, "order_on_hold"            ], 1     );
 				add_action( "woocommerce_order_status_changed",   [ $this, "order_split"              ], 7, 4  );
 				add_action( "woocommerce_order_status_changed",   [ $this, "order_status_change"      ], 9, 4  );
 				add_action( "admin_init",                         [ $this, "order_notification"       ]        );
@@ -430,21 +434,6 @@ class Triibo_Fast_Shop
 	}
 
 	/**
-	 * Auto On hold all WooCommerce orders.
-	 *
-     * @since   1.0.0
-     * @return  void
-	 */
-	public function order_on_hold( $order_id )
-	{
-		// if ( !$order_id ) return;
-
-		// $order = wc_get_order( $order_id );
-
-		// if ( $this->is_only_fs( $order ) ) $order->update_status( "on-hold" );
-	}
-
-	/**
 	 * Register and build the plugin fields
 	 *
 	 * @since 	1.0.0
@@ -725,6 +714,34 @@ class Triibo_Fast_Shop
 		}
 	}
 
+	/**
+	 * Added FS product id to the API response data.
+	 *
+     * @since   2.0.0
+	 * @param 	object $response
+	 * @param 	object $post
+	 * @param 	object $request
+	 * @return 	object
+	 */
+	public function add_vtex_meta_data( $response, $post, $request )
+	{
+		foreach ( $response->data[ "line_items" ] as $index => &$item )
+		{
+            $product = wc_get_product( $item[ "product_id" ] );
+
+			if ( $product )
+			{
+				$meta    = $product->get_meta( "_fs_product_id" );
+
+				$item[ "meta_data" ][] = [
+					"key"   => "_fs_product_id",
+					"value" => $meta
+				];
+			}
+		}
+
+		return $response;
+	}
 }
 
 add_action( "plugins_loaded", array( "Triibo_Fast_Shop", "get_instance" ), 222 );
