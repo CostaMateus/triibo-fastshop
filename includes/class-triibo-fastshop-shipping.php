@@ -228,19 +228,18 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
         if ( "" === $package[ "destination" ][ "postcode" ] || "BR" !== $package[ "destination" ][ "country" ] ) return;
 
         $postcode = strlen( $package[ "destination" ][ "postcode" ] );
-        if ( $postcode < 8 || $postcode > 9 ) return;
 
+        if ( $postcode < 8 || $postcode > 9                       ) return;
         if ( !$this->has_only_selected_shipping_class( $package ) ) return;
 
         $shipping = $this->get_rate( $package );
 
         if ( $shipping[ "error_code" ] !== null )
         {
-			$this->log( "error", json_encode( [
-                "function" => "calculate_shipping_error",
-                "package"  => $package,
-                "return"   => $shipping,
-            ] ), true );
+			$this->log( "error", print_r( [
+                "function" => "calculate_shipping",
+                "shipping" => $shipping,
+            ], true ), true );
 
             return;
         }
@@ -303,7 +302,10 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
         if ( $response[ "code" ] !== 200 )
         {
-            $this->log( "critical", print_r( $response, true ), true );
+            $this->log( "critical", print_r( [
+                "function" => "get_rate",
+                "response" => $response
+            ], true ), true );
 
             $response[ "error_code" ] = $response[ "code" ];
 
@@ -330,7 +332,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             {
                 $fs_undefined = $this->api->env() ? 4744 : 4744;
                 $fs_default   = $this->api->env() ? 3970 : 3970;
-                $fs_normal    = $this->api->env() ? 4824 : 4824;
+                $fs_normal    = $this->api->env() ? 4824 : 4799;
             }
 
             $status     = $item[ "availability" ] ? "instock" : "outofstock";
