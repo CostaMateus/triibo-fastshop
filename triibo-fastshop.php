@@ -277,7 +277,7 @@ class Triibo_Fast_Shop
 			try
 			{
 				$api = new Triibo_Api_Php();
-				$api->update_sku( $sku, self::SELLER );
+				$api->update_sku( "{$product_id}_{$sku}", self::SELLER );
 			}
 			catch ( Exception $e )
 			{
