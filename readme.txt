@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 2.0.1 - 2024/12/13 =
+
+- Ajuste atualização de estoque
+
 = 2.0.0 - 2024/10/22 =
 
 - Novas APIs de integração FS/Vtex

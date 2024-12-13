@@ -263,16 +263,16 @@ class Triibo_Fast_Shop
     /**
      * Update stock when added to cart
 	 *
+	 * @since 	2.0.1 	Fix to use '_fs_product_id' metadata instead of 'SKU'.
      * @since   1.0.0
      * @return  void
      */
 	public function add_to_cart_update_stock( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data )
 	{
         $product = wc_get_product( $product_id );
-        $sku     = $product->get_sku();
-        $split   = explode( "FS-", $sku );
+        $sku     = $product->get_meta( "_fs_product_id" );
 
-        if ( count( $split ) > 1 )
+        if ( $sku )
         {
 			try
 			{
@@ -393,26 +393,6 @@ class Triibo_Fast_Shop
 	{
 		if ( $this->is_suborder_fs( $order ) )
 		{
-			// /**
-			//  * qlqr_status ( -aguardando ) --> processando
-			//  * pedido é CRIADO e na sequencia APROVADO na FS
-			//  */
-			// if ( $old_status != "on-hold" && $new_status == "processing" )
-			// {
-			// 	$api = new Triibo_Fast_Shop_Orders( $order_id, "pending", "on-hold" );
-			// 	$api->send_notification(); // CRIA
-
-			// 	$api->set_process( "on-hold", "processing" );
-			// 	$api->send_notification(); // APROVA
-			// }
-			// else
-			// {
-			// 	$api = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
-			// 	$api->send_notification();
-			// }
-
-			// if ( $old_status == "pending" && $new_status == "processing" ) return;
-
 			if ( $old_status == "on-hold" && $new_status == "processing" ) return;
 
 			$api      = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
