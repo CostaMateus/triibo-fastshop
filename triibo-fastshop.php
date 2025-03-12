@@ -5,7 +5,7 @@
  * Description: 			Comunicação entre MKT, Integração e FastShop. Dependências: Triibo API Services e WooCommerce.
  * Author: 					Mateus Costa
  * Author URI: 				https://costamateus.com.br/
- * Version: 				2.0.1
+ * Version: 				2.0.2
  * Text Domain: 			triibo_fast_shop
  * Requires at least: 		6.4
  * Requires PHP: 			7.4
@@ -13,7 +13,7 @@
  * WC tested up to: 		8.2
  *
  * @package 	Triibo_Fast_Shop
- * @version 	2.0.1
+ * @version 	2.0.2
  */
 defined( "ABSPATH" ) || exit;
 
@@ -27,7 +27,7 @@ class Triibo_Fast_Shop
      * @since   1.0.0
 	 * @var 	string
 	 */
-	const VERSION = "2.0.1";
+	const VERSION = "2.0.2";
 
 	/**
 	 * Plugin domain.
@@ -38,12 +38,20 @@ class Triibo_Fast_Shop
 	const DOMAIN  = "triibo_fast_shop";
 
 	/**
-	 * Seller ID.
+	 * Seller name ID.
 	 *
      * @since   2.0.0
 	 * @var 	string
 	 */
     const SELLER = "fast_shop";
+
+	/**
+	 * Seller ID.
+	 *
+     * @since   2.0.2
+	 * @var 	string
+	 */
+    const SELLER_ID = 4265;
 
 	/**
 	 * Instance of this class.
@@ -333,8 +341,9 @@ class Triibo_Fast_Shop
 	}
 
 	/**
-	 * validates if the order is a suborder from FastShop
+	 * Validates if the order is a suborder from FastShop
 	 *
+     * @since   2.0.2 	Fixed product seller validation.
      * @since   1.0.0
 	 * @return 	bool
 	 */
@@ -348,10 +357,21 @@ class Triibo_Fast_Shop
 
 			foreach ( $items as $item )
 			{
-				$product = $item->get_product();
+				$product_id = $item->get_product_id();
+				$product    = $item->get_product();
+
+				if ( !$product_id || !$product )
+					return false;
+
+				$store_id   = ( int ) dokan_get_vendor_by_product( $product, true );
+
+				if ( !$store_id || $store_id != self::SELLER_ID )
+					return false;
+
 				$hub     = $product->get_shipping_class();
 
-				if ( strpos( $hub, "fast-shop" ) !== false ) return true;
+				if ( strpos( $hub, "fast-shop" ) !== false )
+					return true;
 			}
 		}
 
