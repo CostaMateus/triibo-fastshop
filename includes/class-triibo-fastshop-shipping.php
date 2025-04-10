@@ -330,9 +330,9 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             }
             else
             {
-                $fs_undefined = $this->api->env() ? 4744 : 4744;
-                $fs_default   = $this->api->env() ? 3970 : 3970;
-                $fs_normal    = $this->api->env() ? 4824 : 4799;
+                $fs_undefined = 4744; // $this->api->env() ? 4744 : 4744;
+                $fs_default   = 3970; // $this->api->env() ? 3970 : 3970;
+                $fs_normal    = 4824; // $this->api->env() ? 4824 : 4799;
             }
 
             $status     = $item[ "availability" ] ? "instock" : "outofstock";
@@ -421,7 +421,14 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
 
 		$context = [ "source" => $this->id ];
 
-		if ( $is_error || $this->api->env() === true )
+        /**
+         * $this->api->env()
+         * NULL  === disabled API
+         * TRUE  === homol
+         * FALSE === prod
+         */
+
+		if ( $is_error || $this->api->env() === false )
 			$logger->$level( $message, $context );
 	}
 }
