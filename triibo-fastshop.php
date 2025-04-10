@@ -737,7 +737,7 @@ class Triibo_Fast_Shop
 	 * @param 	object 	$request
 	 * @return 	object
 	 */
-	public function add_vtexmeta_data( $response, $post, $request )
+	public function add_vtex_meta_data( $response, $post, $request )
 	{
 		if ( isset( $response->data[ "line_items" ] ) )
 		{
