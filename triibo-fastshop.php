@@ -347,12 +347,15 @@ class Triibo_Fast_Shop
      * @since   1.0.0
 	 * @return 	bool
 	 */
-	private function is_suborder_fs( $order )
+	private function is_fs_order( $order )
 	{
 		$subOrder = empty( $order->get_meta( "has_sub_order" ) ) ? false : true;
 
 		if ( !$subOrder )
 		{
+			if ( !empty( $order->get_meta( "_fastshop_order_id" ) ) )
+				return true;
+
 			$items = $order->get_items();
 
 			foreach ( $items as $item )
@@ -411,15 +414,10 @@ class Triibo_Fast_Shop
 	 */
 	public function order_status_change( $order_id, $old_status, $new_status, $order )
 	{
-		if ( $this->is_suborder_fs( $order ) )
+		if ( $this->is_fs_order( $order ) )
 		{
 			if ( $old_status == "on-hold" && $new_status == "processing" )
 				return;
-
-			// $is_integration = $order->get_meta( "_is_integration" );
-
-			// if ( $old_status == "pending" && $new_status == "processing" && $is_integration == "yes" )
-			// 	return;
 
 			$api      = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
 			$response = $api->send_notification();
