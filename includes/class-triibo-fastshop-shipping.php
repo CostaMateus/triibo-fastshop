@@ -410,6 +410,7 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
     /**
      * Register log
      *
+     * @since   2.0.3   Fix env prod.
      * @since   2.0.0   Reworked log function.
      * @since   1.0.0
      * @param   string  $data

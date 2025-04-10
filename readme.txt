@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 2.0.3 - 2025/04/10 =
+
+- Corrigido de criação de log em produção
+
 = 2.0.2 - 2025/03/12 =
 
 - Corrigido a validação do vendedor do produto

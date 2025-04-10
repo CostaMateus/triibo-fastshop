@@ -5,7 +5,7 @@
  * Description: 			Comunicação entre MKT, Integração e FastShop. Dependências: Triibo API Services e WooCommerce.
  * Author: 					Mateus Costa
  * Author URI: 				https://costamateus.com.br/
- * Version: 				2.0.2
+ * Version: 				2.0.3
  * Text Domain: 			triibo_fast_shop
  * Requires at least: 		6.4
  * Requires PHP: 			7.4
@@ -13,7 +13,7 @@
  * WC tested up to: 		8.2
  *
  * @package 	Triibo_Fast_Shop
- * @version 	2.0.2
+ * @version 	2.0.3
  */
 defined( "ABSPATH" ) || exit;
 
@@ -27,7 +27,7 @@ class Triibo_Fast_Shop
      * @since   1.0.0
 	 * @var 	string
 	 */
-	const VERSION = "2.0.2";
+	const VERSION = "2.0.3";
 
 	/**
 	 * Plugin domain.
@@ -413,7 +413,13 @@ class Triibo_Fast_Shop
 	{
 		if ( $this->is_suborder_fs( $order ) )
 		{
-			if ( $old_status == "on-hold" && $new_status == "processing" ) return;
+			if ( $old_status == "on-hold" && $new_status == "processing" )
+				return;
+
+			// $is_integration = $order->get_meta( "_is_integration" );
+
+			// if ( $old_status == "pending" && $new_status == "processing" && $is_integration == "yes" )
+			// 	return;
 
 			$api      = new Triibo_Fast_Shop_Orders( $order_id, $old_status, $new_status );
 			$response = $api->send_notification();
