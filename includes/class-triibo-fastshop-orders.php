@@ -147,7 +147,7 @@ class Triibo_Fast_Shop_Orders
 
         if ( !$this->type )
         {
-            $this->log( "info", "This changing of status is not mapped: {$this->old_status} >> {$this->new_status}", true );
+            $this->log( "info", "#{$this->order_id}: This changing of status is not mapped, {$this->old_status} >> {$this->new_status}", true );
             return;
         }
 
@@ -534,7 +534,14 @@ class Triibo_Fast_Shop_Orders
 
 		$context = [ "source" => $this->id ];
 
-		if ( $is_error || $this->api->env() === true )
+        /**
+         * $this->api->env()
+         * NULL  === disabled API
+         * TRUE  === homol
+         * FALSE === prod
+         */
+
+		if ( $is_error || $this->api->env() === false )
 			$logger->$level( $message, $context );
 	}
 }
