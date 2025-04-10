@@ -730,26 +730,30 @@ class Triibo_Fast_Shop
 	/**
 	 * Added FS product id to the API response data.
 	 *
+     * @since   2.0.3 	Check if line_items is set.
      * @since   2.0.0
-	 * @param 	object $response
-	 * @param 	object $post
-	 * @param 	object $request
+	 * @param 	object 	$response
+	 * @param 	object 	$post
+	 * @param 	object 	$request
 	 * @return 	object
 	 */
-	public function add_vtex_meta_data( $response, $post, $request )
+	public function add_vtexmeta_data( $response, $post, $request )
 	{
-		foreach ( $response->data[ "line_items" ] as $index => &$item )
+		if ( isset( $response->data[ "line_items" ] ) )
 		{
-            $product = wc_get_product( $item[ "product_id" ] );
-
-			if ( $product )
+			foreach ( $response->data[ "line_items" ] as $index => &$item )
 			{
-				$meta    = $product->get_meta( "_fs_product_id" );
+				$product = wc_get_product( $item[ "product_id" ] );
 
-				$item[ "meta_data" ][] = [
-					"key"   => "_fs_product_id",
-					"value" => $meta
-				];
+				if ( $product )
+				{
+					$meta    = $product->get_meta( "_fs_product_id" );
+
+					$item[ "meta_data" ][] = [
+						"key"   => "_fs_product_id",
+						"value" => $meta
+					];
+				}
 			}
 		}
 

@@ -3,6 +3,7 @@
 = 2.0.3 - 2025/04/10 =
 
 - Corrigido de criação de log em produção
+- Ajuste na função que prepara os metadados da lista de produtos do pedido
 
 = 2.0.2 - 2025/03/12 =
 
