@@ -319,48 +319,16 @@ class Triibo_Fast_Shop_Shipping extends WC_Shipping_Method
             $product_id = wc_get_product_id_by_sku( $sku );
             $product    = wc_get_product( $product_id );
 
-            $code       = $data[ "error_code" ];
-            $item       = $data[ "data"       ];
+            $item       = $data[ "data" ];
+
+            $fs_normal  = 4799;
 
             if ( get_home_url() === "http://shopkeeper.local" )
-            {
-                $fs_undefined = 153;
-                $fs_default   = 154;
-                $fs_normal    = 155;
-            }
-            else
-            {
-                $fs_undefined = 4744; // $this->api->env() ? 4744 : 4744;
-                $fs_default   = 3970; // $this->api->env() ? 3970 : 3970;
-                $fs_normal    = 4824; // $this->api->env() ? 4824 : 4799;
-            }
+                $fs_normal = 155;
 
-            $status     = $item[ "availability" ] ? "instock" : "outofstock";
-            $product->set_stock_status( $status );
-
-            if ( in_array( $code, [ 4000, 4001 ] ) )
-            {
-                $product->update_meta_data( "_fastshop_hub", "-" );
-                $product->set_shipping_class_id( $fs_default );
-            }
-            else
-            {
-                $hub = !empty( $item[ "hub" ] ) ? $item[ "hub" ] : "-";
-                $product->update_meta_data( "_fastshop_hub", $hub );
-
-                if ( $hub != "-" )
-                {
-                    $hub_map = [ "normal" => $fs_normal ];
-
-                    $hub_id  = $hub_map[ $hub ] ?? $fs_undefined;
-
-                    $product->set_shipping_class_id( $hub_id );
-                }
-                else
-                {
-                    $product->set_shipping_class_id( $fs_default );
-                }
-            }
+            $product->set_stock_status( ( $item[ "availability" ] ? "instock" : "outofstock" ) );
+            $product->update_meta_data( "_fastshop_hub", "normal" );
+            $product->set_shipping_class_id( $fs_normal );
 
             if ( isset( $item[ "regular_price" ] ) && isset( $item[ "sale_price" ] ) )
             {
