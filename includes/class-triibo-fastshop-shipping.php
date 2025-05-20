@@ -443,7 +443,7 @@ class Triibo_Fast_Shop_Shipping extends \WC_Shipping_Method
      *
      * @return void
      */
-    public function log( string $level, string $message, array $context = [], bool $is_error = false ) : void
+    public function log( string $level = "info", string $message, array $context = [], bool $is_error = false ) : void
     {
 		$logger  = ( function_exists( function: "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
 
