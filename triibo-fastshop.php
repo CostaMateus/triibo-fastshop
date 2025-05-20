@@ -740,7 +740,7 @@ class Triibo_Fast_Shop
             $plugin_meta[] = sprintf(
                 "<a href='%s' class='thickbox open-plugin-details-modal' aria-label='%s' data-title='%s'>%s</a>",
                 add_query_arg( "TB_iframe", "true", $url ),
-                esc_attr( text: sprintf( format: __( text: "More information about %s" ), values: $plugin_data[ "Name" ] ) ),
+                esc_attr( text: sprintf( __( text: "More information about %s" ), $plugin_data[ "Name" ] ) ),
                 esc_attr( text: $plugin_data[ "Name" ] ),
                 __( text: "Histórico de alterações" )
             );
