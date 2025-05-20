@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 2.1.0 - 2025/05/16 =
+
+- Ajuste de requisitos.
+
 = 2.0.3 - 2025/04/10 =
 
 - Corrigido de criação de log em produção

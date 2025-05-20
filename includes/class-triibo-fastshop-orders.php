@@ -2,38 +2,77 @@
 /**
  * Fast Shop Orders
  *
- * @package Triibo_Fast_Shop/Classes
- * @since   1.0.0
+ * @author Mateus Costa <mateus@costamateus.com.br>
+ *
+ * @since 1.0.0
  * @version 1.0.0
  */
-defined( "ABSPATH" ) || exit;
-
-/**
- * Plugins Order class.
- */
+defined( constant_name: "ABSPATH" ) || exit;
 class Triibo_Fast_Shop_Orders
 {
-    const ID     = "triibo-fast-shop-orders";
+    /**
+     * @since 1.0.0
+     *
+     * @var string
+     */
+    const ID = "triibo-fast-shop-orders";
+
+    /**
+     * @since 1.0.0
+     *
+     * @var string
+     */
     const SELLER = "fast_shop";
 
-    private $api        = null;
-    private $type       = null;
+    /**
+     * @since 1.0.0
+     *
+     * @var Triibo_Api_Php|null
+     */
+    private ?Triibo_Api_Php $api = null;
 
-    private $order_id   = null;
-    private $old_status = null;
-    private $new_status = null;
+    /**
+     * @since 1.0.0
+     *
+     * @var string|null
+     */
+    private ?string $type = null;
+
+    /**
+     * @since 1.0.0
+     *
+     * @var int
+     */
+    private ?int $order_id = null;
+
+    /**
+     * @since 1.0.0
+     *
+     * @var string|null
+     */
+    private ?string $old_status = null;
+
+    /**
+     * @since 1.0.0
+     *
+     * @var string|null
+     */
+    private ?string $new_status = null;
 
 	/**
 	 * Initialize webservice.
 	 *
-     * @since   1.0.0
-	 * @param   array $package Shipping package.
+     * @since 1.0.0
+     *
+	 * @param int       $order_id
+	 * @param string    $old_status
+	 * @param string    $new_status
 	 */
-	public function __construct( $order_id = null, $old_status = null, $new_status = null )
+	public function __construct( ?int $order_id = null, ?string $old_status = null, ?string $new_status = null )
     {
         $this->id  = self::ID;
 
-        $this->api = new Triibo_Api_Php();
+        $this->api = new Triibo_Api_Php( seller: self::SELLER );
 
         if ( $order_id && $old_status && $new_status )
         {
@@ -48,10 +87,11 @@ class Triibo_Fast_Shop_Orders
     /**
      * Get processing type
      *
-     * @since   1.1.0
-     * @return  string
+     * @since 1.1.0
+     *
+     * @return string
      */
-    public function get_type()
+    public function get_type() : string
     {
         return $this->type;
     }
@@ -59,11 +99,14 @@ class Triibo_Fast_Shop_Orders
     /**
      * Set process
      *
-     * @param   string  $old_status
-     * @param   string  $new_status
-     * @return  void
+     * @since 1.0.0
+     *
+     * @param string    $old_status
+     * @param string    $new_status
+     *
+     * @return void
      */
-    public function set_process( $old_status, $new_status )
+    public function set_process( string $old_status, string $new_status ) : void
     {
 		$this->old_status = $old_status;
 		$this->new_status = $new_status;
@@ -74,10 +117,11 @@ class Triibo_Fast_Shop_Orders
 	/**
 	 * Process the order
 	 *
-     * @since   1.0.0
-	 * @return  void
+     * @since 1.0.0
+     *
+	 * @return void
 	 */
-	private function process_order()
+	private function process_order() : void
     {
         // // qlqr_status ( -processando -concluido )  --> aguardando   ==  cria FS
         // // pendente                                 --> malsucedido  ==  cria FS
@@ -131,31 +175,35 @@ class Triibo_Fast_Shop_Orders
     /**
      * Process the order, send to integration
      *
-     * @since   1.0.0
-     * @return  array
+     * @since 1.0.0
+     *
+     * @return array
      */
-    public function send_notification()
+    public function send_notification() : array
     {
-        $status = get_option( "triibo_fast_shop_fs_status" );
+        $status = get_option( option: "triibo_fast_shop_fs_status" );
 
         if ( $status != "on" )
         {
-            $url = esc_url( admin_url( "admin.php?page=" . Triibo_Fast_Shop::DOMAIN . "-settings" ) );
-            $this->log( "info", "Order notification is disabled. Enable in this link: {$url}", true );
-            return;
+            $url = esc_url( url: admin_url( path: "admin.php?page=" . Triibo_Fast_Shop::DOMAIN . "-settings" ) );
+            $this->log( level: "info", message: "Order notification is disabled. Enable in this link: {$url}", is_error: true );
+
+            return [];
         }
 
-        if ( !$this->type )
+        if ( ! $this->type )
         {
-            $this->log( "info", "#{$this->order_id}: This changing of status is not mapped, {$this->old_status} >> {$this->new_status}", true );
-            return;
+            $this->log( level: "info", message: "#{$this->order_id}: This changing of status is not mapped, {$this->old_status} >> {$this->new_status}", is_error: true );
+
+            return [];
         }
 
         switch ( $this->type )
         {
             case "ordercreation":
-                $this->log( "info", "Creating order FS: #{$this->order_id}" );
-                $response   = $this->api->order_creation( $this->order_id, self::SELLER );
+                $this->log( level: "info", message: "Creating order FS: #{$this->order_id}" );
+
+                $response   = $this->api->order_creation( order_id: $this->order_id );
                 $error_code = $response[ "data" ][ "error_code" ];
                 $message    = ( $response[ "success" ] )
                                 ? "Successfully created: #{$this->order_id}"
@@ -163,8 +211,9 @@ class Triibo_Fast_Shop_Orders
             break;
 
             case "orderapproved":
-                $this->log( "info", "Approving order FS: #{$this->order_id}" );
-                $response   = $this->api->order_approval( $this->order_id, self::SELLER );
+                $this->log( level: "info", message: "Approving order FS: #{$this->order_id}" );
+
+                $response   = $this->api->order_approval( order_id: $this->order_id );
                 $error_code = $response[ "data" ][ "error_code" ];
                 $message    = ( $response[ "success" ] )
                                 ? "Successfully approved: #{$this->order_id}"
@@ -172,8 +221,9 @@ class Triibo_Fast_Shop_Orders
             break;
 
             case "ordercancelation":
-                $this->log( "info", "Canceling order FS: #{$this->order_id}" );
-                $response   = $this->api->order_cancellation( $this->order_id, self::SELLER );
+                $this->log( level: "info", message: "Canceling order FS: #{$this->order_id}" );
+
+                $response   = $this->api->order_cancellation( order_id: $this->order_id );
                 $error_code = $response[ "data" ][ "error_code" ];
                 $message    = ( $response[ "success" ] )
                                 ? "Successfully cancelled: #{$this->order_id}"
@@ -181,7 +231,9 @@ class Triibo_Fast_Shop_Orders
             break;
         }
 
-        $this->log( "info", $message );
+        $level = ( $response[ "success" ] ) ? "info" : "error";
+
+        $this->log( level: $level, message: $message, context: $response, is_error: $level === "error" );
 
         return [
             "error_code" => $error_code,
@@ -193,14 +245,18 @@ class Triibo_Fast_Shop_Orders
     /**
      * Valid if it is necessary to create sub-orders for the order in question
      *
-     * @since   1.0.0
-     * @return  void
+     * @since 1.0.0
+     *
+     * @param int           $parent_order_id
+     * @param \WC_Order     $parent_order
+     *
+     * @return void
      */
-    public function maybe_split_orders( $parent_order_id, $parent_order )
+    public function maybe_split_orders( int $parent_order_id, \WC_Order $parent_order ) : void
     {
-        $this->log( "info", sprintf( "TRIIBO: New Order #%d created. Init sub order.", $parent_order_id ) );
+        $this->log( level: "info", message: sprintf( format: "TRIIBO: New Order #%d created. Init sub order.", values: $parent_order_id ) );
 
-        if ( $parent_order->get_meta( "has_sub_order" ) == true )
+        if ( $parent_order->get_meta( key: "has_sub_order" ) == true )
         {
             $args = [
                 "post_parent" => $parent_order_id,
@@ -209,9 +265,10 @@ class Triibo_Fast_Shop_Orders
                 "post_status" => "any",
             ];
 
-            $child_orders = get_children( $args );
+            $child_orders = get_children( args: $args );
 
-            foreach ( $child_orders as $child ) wp_delete_post( $child->ID, true );
+            foreach ( $child_orders as $child )
+                wp_delete_post( post_id: $child->ID, force_delete: true );
         }
 
         $hubs        = [];
@@ -223,39 +280,43 @@ class Triibo_Fast_Shop_Orders
             $product = $item->get_product();
             $hub     = $product->get_shipping_class();
 
-            if ( strpos( $hub, "fast-shop-" ) !== false )
+            if ( strpos( haystack: $hub, needle: "fast-shop-" ) !== false )
             {
-                $seller_id      = get_post_field( "post_author", $item[ "product_id" ] );
+                $seller_id      = get_post_field( field: "post_author", post: $item[ "product_id" ] );
                 $hubs[ $hub ][] = $item;
             }
         }
 
-        if ( count( $hubs ) <= 1 )
+        if ( count( value: $hubs ) <= 1 )
         {
-            $this->log( "info", "TRIIBO: 1 hub only, skipping sub order" );
+            $this->log( level: "info", message: "TRIIBO: 1 hub only, skipping sub order" );
             return;
         }
 
-        $parent_order->update_meta_data( "has_sub_order", true );
+        $parent_order->update_meta_data( key: "has_sub_order", value: true );
         $parent_order->save();
 
-        $this->log( "info", sprintf( "TRIIBO: Got %s hubs, starting sub order", count( $hubs ) ) );
+        $this->log( level: "info", message: sprintf( format: "TRIIBO: Got %s hubs, starting sub order", values: count( value: $hubs ) ) );
 
         foreach ( $hubs as $hub => $hub_products )
-        {
-            $this->create_sub_order( $parent_order, $seller_id, $hub, $hub_products );
-        }
+            $this->create_sub_order( parent_order: $parent_order, seller_id: $seller_id, hub: $hub, hub_products: $hub_products );
     }
 
     /**
      * Creates the sub-order
      *
-     * @since   1.0.0
-     * @return  void|WP_Error
+     * @since 1.0.0
+     *
+     * @param \WC_Order     $parent_order
+     * @param int           $seller_id
+     * @param string        $hub
+     * @param array         $hub_products
+     *
+     * @return \WC_Order|\WP_Error
      */
-    private function create_sub_order( $parent_order, $seller_id, $hub, $hub_products )
+    private function create_sub_order( \WC_Order $parent_order, int $seller_id, string $hub, array $hub_products ) : mixed
     {
-        $this->log( "info", "TRIIBO: Creating sub order for hub: " . $hub );
+        $this->log( level: "info", message: "TRIIBO: Creating sub order for hub: " . $hub );
 
         $bill_ship = [
             "billing_country",
@@ -290,77 +351,83 @@ class Triibo_Fast_Shop_Orders
                     $order->{ "set_{$key}" }( $parent_order->{"get_{$key}"}() );
 
             // now insert line items
-            $this->create_line_items( $order, $hub_products );
+            $this->create_line_items( order: $order, products: $hub_products );
 
             // do shipping
-            $this->create_shipping( $order, $parent_order, $hub_products );
+            $this->create_shipping( order: $order, parent_order: $parent_order, products: $hub_products );
 
             // do tax
-            $this->create_taxes( $order, $parent_order, $hub_products );
+            $this->create_taxes( order: $order, parent_order: $parent_order, products: $hub_products );
 
             // add coupons if any
-            $this->create_coupons( $order, $parent_order, $hub_products );
+            $this->create_coupons( order: $order, parent_order: $parent_order, products: $hub_products );
 
             // save other details
-            $order->set_created_via( "triibo-fastshop-orders" );
-            $order->set_cart_hash( $parent_order->get_cart_hash() );
-            $order->set_customer_id( $parent_order->get_customer_id() );
-            $order->set_currency( $parent_order->get_currency() );
-            $order->set_prices_include_tax( $parent_order->get_prices_include_tax() );
-            $order->set_customer_ip_address( $parent_order->get_customer_ip_address() );
-            $order->set_customer_user_agent( $parent_order->get_customer_user_agent() );
-            $order->set_customer_note( $parent_order->get_customer_note() );
-            $order->set_payment_method( $parent_order->get_payment_method() );
-            $order->set_payment_method_title( $parent_order->get_payment_method_title() );
-            $order->update_meta_data( "_dokan_vendor_id", $seller_id );
+            $order->set_created_via( value: "triibo-fastshop-orders" );
+            $order->set_cart_hash( value: $parent_order->get_cart_hash() );
+            $order->set_customer_id( value: $parent_order->get_customer_id() );
+            $order->set_currency( value: $parent_order->get_currency() );
+            $order->set_prices_include_tax( value: $parent_order->get_prices_include_tax() );
+            $order->set_customer_ip_address( value: $parent_order->get_customer_ip_address() );
+            $order->set_customer_user_agent( value: $parent_order->get_customer_user_agent() );
+            $order->set_customer_note( value: $parent_order->get_customer_note() );
+            $order->set_payment_method( payment_method: $parent_order->get_payment_method() );
+            $order->set_payment_method_title( value: $parent_order->get_payment_method_title() );
+            $order->update_meta_data( key: "_dokan_vendor_id", value: $seller_id );
 
             // finally, let the order re-calculate itself and save
             $order->calculate_totals();
 
-            $order->set_status( $parent_order->get_status() );
-            $order->set_parent_id( $parent_order->get_id() );
+            $order->set_status( new_status: $parent_order->get_status() );
+            $order->set_parent_id( value: $parent_order->get_id() );
 
             $order_id = $order->save();
 
-            $this->log( "info", "TRIIBO: Created sub order : #" . $order_id );
+            $this->log( level: "info", message: "TRIIBO: Created sub order : #" . $order_id );
 
             // update total_sales count for sub-order
-            wc_update_total_sales_counts( $order_id );
+            wc_update_total_sales_counts( order_id: $order_id );
         }
         catch ( Exception $e )
         {
-            return new WP_Error( "dokan-suborder-error", $e->getMessage() );
+            return new WP_Error( code: "dokan-suborder-error", message: $e->getMessage() );
         }
+
+        return $order;
     }
 
     /**
      * Creates line items for the sub-order
      *
-     * @since   1.0.0
-     * @return  void
+     * @since 1.0.0
+     *
+     * @param \WC_Order     $order
+     * @param array         $products
+     *
+     * @return void
      */
-    private function create_line_items( $order, $products )
+    private function create_line_items( \WC_Order $order, array $products ) : void
     {
         foreach ( $products as $item )
         {
             $product_item = new \WC_Order_Item_Product();
 
-            $product_item->set_name         ( $item->get_name()         );
-            $product_item->set_product_id   ( $item->get_product_id()   );
-            $product_item->set_variation_id ( $item->get_variation_id() );
-            $product_item->set_quantity     ( $item->get_quantity()     );
-            $product_item->set_tax_class    ( $item->get_tax_class()    );
-            $product_item->set_subtotal     ( $item->get_subtotal()     );
-            $product_item->set_subtotal_tax ( $item->get_subtotal_tax() );
-            $product_item->set_total_tax    ( $item->get_total_tax()    );
-            $product_item->set_total        ( $item->get_total()        );
-            $product_item->set_taxes        ( $item->get_taxes()        );
+            $product_item->set_name         ( value: $item->get_name()         );
+            $product_item->set_product_id   ( value: $item->get_product_id()   );
+            $product_item->set_variation_id ( value: $item->get_variation_id() );
+            $product_item->set_quantity     ( value: $item->get_quantity()     );
+            $product_item->set_tax_class    ( value: $item->get_tax_class()    );
+            $product_item->set_subtotal     ( value: $item->get_subtotal()     );
+            $product_item->set_subtotal_tax ( value: $item->get_subtotal_tax() );
+            $product_item->set_total_tax    ( value: $item->get_total_tax()    );
+            $product_item->set_total        ( value: $item->get_total()        );
+            $product_item->set_taxes        ( raw_tax_data: $item->get_taxes() );
 
             $metadata     = $item->get_meta_data();
 
             if ( $metadata )
                 foreach ( $metadata as $meta )
-                    $product_item->add_meta_data( $meta->key, $meta->value );
+                    $product_item->add_meta_data( key: $meta->key, value: $meta->value );
 
             $order->add_item( $product_item );
         }
@@ -371,82 +438,93 @@ class Triibo_Fast_Shop_Orders
     /**
      * Creates shipping for the sub-order
      *
-     * @since   1.0.0
-     * @return  void
+     * @since 1.0.0
+     *
+     * @param \WC_Order     $order
+     * @param \WC_Order     $parent_order
+     * @param array         $products
+     *
+     * @return void
      */
-    private function create_shipping( $order, $parent_order, $products )
+    private function create_shipping( \WC_Order $order, \WC_Order $parent_order, array $products ) : void
     {
         $shipping_methods         = $parent_order->get_shipping_methods();
 
-        if ( !$shipping_methods )
+        if ( ! $shipping_methods )
         {
-            $this->log( "info", "TRIIBO: No shipping method found : Aborting : #" . $order->get_id() );
+            $this->log( level: "info", message: "TRIIBO: No shipping method found : Aborting : #" . $order->get_id() );
             return;
         }
 
         foreach ( $shipping_methods as $key => $shipping_method )
         {
-            if ( is_a( $shipping_method, "WC_Order_Item_Shipping" ) )
+            if ( ! is_a( object_or_class: $shipping_method, class: "WC_Order_Item_Shipping" ) )
+                continue;
+
+            $total    = 0;
+
+            $item     = new \WC_Order_Item_Shipping();
+            $metadata = $shipping_method->get_meta_data();
+
+            if ( $metadata )
             {
-                $total    = 0;
-
-                $item     = new \WC_Order_Item_Shipping();
-                $metadata = $shipping_method->get_meta_data();
-
-                if ( $metadata )
+                foreach ( $metadata as $meta )
                 {
-                    foreach ( $metadata as $meta )
+                    if ( $meta->key != "price" )
                     {
-                        if ( $meta->key == "price" )
+                        $item->add_meta_data( key: $meta->key, value: $meta->value );
+                        continue;
+                    }
+
+                    $data     = $meta->get_data();
+                    $new_meta = [ "value" => [] ];
+
+                    foreach ( $products as $product )
+                    {
+                        $product_id = $product->get_product_id();
+
+                        if ( isset( $data[ "value" ][ $product_id ] ) )
                         {
-                            $data     = $meta->get_data();
-                            $new_meta = [ "value" => [] ];
+                            $value  = $data[ "value" ][ $product_id ];
+                            $total += $value;
 
-                            foreach ( $products as $product )
-                            {
-                                $product_id = $product->get_product_id();
-
-                                if ( isset( $data[ "value" ][ $product_id ] ) )
-                                {
-                                    $value  = $data[ "value" ][ $product_id ];
-                                    $total += $value;
-
-                                    $new_meta[ "value" ][ $product_id ] = $value;
-                                }
-                            }
-
-                            $item->add_meta_data( $meta->key, $new_meta );
-                        }
-                        else
-                        {
-                            $item->add_meta_data( $meta->key, $meta->value );
+                            $new_meta[ "value" ][ $product_id ] = $value;
                         }
                     }
-                }
 
-                $item->set_props( [
+                    $item->add_meta_data( key: $meta->key, value: $new_meta );
+                }
+            }
+
+            $item->set_props(
+                props: [
                     "method_title" => $shipping_method->get_name(),
                     "method_id"    => $shipping_method->get_method_id(),
                     "taxes"        => $shipping_method->get_taxes(),
                     "total"        => $total,
-                ] );
+                ]
+            );
 
-                $order->add_item( $item );
-                $order->set_shipping_total( $shipping_method->get_total() );
-                $order->save();
-            }
+            $order->add_item( item: $item );
+            $order->set_shipping_total( value: $shipping_method->get_total() );
+            $order->save();
         }
     }
 
     /**
      * Creates taxes for the sub-order
      *
-     * @since   1.0.0
-     * @return  void
+     * @since 1.0.0
+     *
+     * @param \WC_Order     $order
+     * @param \WC_Order     $parent_order
+     * @param array         $products
+     *
+     * @return void
      */
-    private function create_taxes( $order, $parent_order, $products )
+    private function create_taxes( \WC_Order $order, \WC_Order $parent_order, array $products ) : void
     {
-        $shipping  = $order->get_items( "shipping" );
+        $shipping  = $order->get_items( types: "shipping" );
         $tax_total = 0;
 
         foreach ( $products as $item )
@@ -454,19 +532,21 @@ class Triibo_Fast_Shop_Orders
 
         foreach ( $parent_order->get_taxes() as $tax )
         {
-            $seller_shipping = reset( $shipping );
+            $seller_shipping = reset( array: $shipping );
 
             $item = new \WC_Order_Item_Tax();
-            $item->set_props( [
-                "rate_id"            => $tax->get_rate_id(),
-                "label"              => $tax->get_label(),
-                "compound"           => $tax->get_compound(),
-                "rate_code"          => \WC_Tax::get_rate_code( $tax->get_rate_id() ),
-                "tax_total"          => $tax_total,
-                "shipping_tax_total" => is_bool( $seller_shipping ) ? "" : $seller_shipping->get_total_tax(),
-            ] );
+            $item->set_props(
+                props: [
+                    "rate_id"            => $tax->get_rate_id(),
+                    "label"              => $tax->get_label(),
+                    "compound"           => $tax->get_compound(),
+                    "rate_code"          => \WC_Tax::get_rate_code( key_or_rate: $tax->get_rate_id() ),
+                    "tax_total"          => $tax_total,
+                    "shipping_tax_total" => is_bool( value: $seller_shipping ) ? "" : $seller_shipping->get_total_tax(),
+                ]
+            );
 
-            $order->add_item( $item );
+            $order->add_item( item: $item );
         }
 
         $order->save();
@@ -475,45 +555,56 @@ class Triibo_Fast_Shop_Orders
     /**
      * Creates coupons for the sub-order
      *
-     * @since   1.0.0
-     * @return  void
+     * @since 1.0.0
+     *
+     * @param \WC_Order     $order
+     * @param \WC_Order     $parent_order
+     * @param array         $products
+     *
+     * @return void
      */
-    private function create_coupons( $order, $parent_order, $products )
+    private function create_coupons( \WC_Order $order, \WC_Order $parent_order, array $products ) : void
     {
-        $used_coupons = $parent_order->get_items( "coupon" );
+        $used_coupons = $parent_order->get_items( types: "coupon" );
         $product_ids  = array_map(
-            function( $item ) {
+            callback: function( $item ) : mixed
+            {
                 return $item->get_product_id();
-            }, $products
+            },
+            array: $products
         );
 
-        if ( !$used_coupons ) return;
+        if ( ! $used_coupons )
+            return;
 
-        $seller_id = dokan_get_seller_id_by_order( $order->get_id() );
+        $seller_id = dokan_get_seller_id_by_order( order: $order->get_id() );
 
-        if ( !$seller_id ) return;
+        if ( ! $seller_id )
+            return;
 
         foreach ( $used_coupons as $item )
         {
-            $coupon = new \WC_Coupon( $item->get_code() );
+            $coupon = new \WC_Coupon( data: $item->get_code() );
 
             if (
                 $coupon &&
-                !is_wp_error( $coupon ) &&
-                ( array_intersect( $product_ids, $coupon->get_product_ids() ) ||
+                ! is_wp_error( thing: $coupon ) &&
+                ( array_intersect( array: $product_ids, arrays: $coupon->get_product_ids() ) ||
                     apply_filters( "dokan_is_order_have_admin_coupon", false, $coupon, [ $seller_id ], $product_ids )
                 )
             ) {
                 $new_item = new \WC_Order_Item_Coupon();
-                $new_item->set_props( [
-                    "code"         => $item->get_code(),
-                    "discount"     => $item->get_discount(),
-                    "discount_tax" => $item->get_discount_tax(),
-                ] );
+                $new_item->set_props(
+                    props: [
+                        "code"         => $item->get_code(),
+                        "discount"     => $item->get_discount(),
+                        "discount_tax" => $item->get_discount_tax(),
+                    ]
+                );
 
-                $new_item->add_meta_data( "coupon_data", $coupon->get_data() );
+                $new_item->add_meta_data( key: "coupon_data", value: $coupon->get_data() );
 
-                $order->add_item( $new_item );
+                $order->add_item( item: $new_item );
             }
         }
 
@@ -523,24 +614,23 @@ class Triibo_Fast_Shop_Orders
     /**
      * Register log
      *
-     * @since   2.0.3   Fix env prod.
-     * @since   2.0.0   Reworked log function.
-     * @since   1.0.0
-     * @param   string  $data
-     * @return  void
+     * @since 2.1.0     Add context parameter.
+     * @since 2.0.3     Fix env prod.
+     * @since 2.0.0     Reworked log function.
+     * @since 1.0.0
+     *
+	 * @param string 	$level 		The log level (e.g., 'error', 'info')
+	 * @param string 	$message 	The log message
+	 * @param array 	$context 	Additional context for the log message
+	 * @param bool 		$is_error 	Whether the log is an error
+     *
+     * @return void
      */
-    public function log( string $level, string $message, bool $is_error = false )
+    public function log( string $level, string $message, array $context = [], bool $is_error = false ) : void
     {
-		$logger  = ( function_exists( "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
+		$logger  = ( function_exists( function: "wc_get_logger" ) ) ? wc_get_logger() : new WC_Logger();
 
-		$context = [ "source" => $this->id ];
-
-        /**
-         * $this->api->env()
-         * NULL  === disabled API
-         * TRUE  === homol
-         * FALSE === prod
-         */
+		$context = array_merge( $context, [ "source" => self::ID ] );
 
 		if ( $is_error || $this->api->env() === false )
 			$logger->$level( $message, $context );
