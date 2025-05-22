@@ -129,35 +129,35 @@ class Triibo_Fast_Shop
 		// Shipping Class
 		include_once dirname( path: __FILE__ ) . "/includes/class-triibo-fastshop-shipping.php";
 
-		add_filter( hook_name: "plugin_action_links_" . plugin_basename( file: __FILE__ ), callback: [ $this, "plugin_action_links" ]        );
-		add_filter( hook_name: "woocommerce_rest_suppress_image_upload_error",       callback: [ $this, "image_upload_error"  ], priority: 10, accepted_args: 4 );
+		add_filter( hook_name: "plugin_action_links_" . plugin_basename( file: __FILE__ ), callback: [ $this, "plugin_action_links" ] );
+		add_filter( hook_name: "woocommerce_rest_suppress_image_upload_error", callback: [ $this, "image_upload_error" ], accepted_args: 4 );
 
 		/**
 		 * @since 1.2.0
 		 */
-		add_filter( hook_name: "plugin_row_meta",                                    callback: [ $this, "plugin_row_meta"     ], priority: 10, accepted_args: 3 );
+		add_filter( hook_name: "plugin_row_meta", callback: [ $this, "plugin_row_meta" ], accepted_args: 3 );
 
 		/**
 		 * @since 2.0.0
 		 */
-		add_action( hook_name: "woocommerce_rest_prepare_shop_order_object",         callback: [ $this, "add_vtex_meta_data"  ], priority: 10, accepted_args: 3 );
+		add_action( hook_name: "woocommerce_rest_prepare_shop_order_object", callback: [ $this, "add_vtex_meta_data" ], accepted_args: 3 );
 
-		add_action( hook_name: "admin_menu",                         callback: [ $this, "add_submenu_page"         ], priority: 11    );
-		add_action( hook_name: "triibo_api_service_add_button",      callback: [ $this, "add_btn"                  ], priority: 11    );
-		add_action( hook_name: "triibo_api_service_list_plugin_php", callback: [ $this, "add_info_dependency"      ],       );
+		add_action( hook_name: "admin_menu", callback: [ $this, "add_submenu_page" ], priority: 11 );
+		add_action( hook_name: "triibo_api_service_add_button", callback: [ $this, "add_btn" ], priority: 11 );
+		add_action( hook_name: "triibo_api_service_list_plugin_php", callback: [ $this, "add_info_dependency" ] );
 
 		// Update stock when added to cart
-		add_action( hook_name: "woocommerce_add_to_cart",            callback: [ $this, "add_to_cart_update_stock" ], priority: 10, accepted_args: 6 );
+		add_action( hook_name: "woocommerce_add_to_cart", callback: [ $this, "add_to_cart_update_stock" ], accepted_args: 6 );
 
 		// Order Actions
-		add_action( hook_name: "woocommerce_order_status_changed",   callback: [ $this, "order_split"              ], priority: 7, accepted_args: 4  );
-		add_action( hook_name: "woocommerce_order_status_changed",   callback: [ $this, "order_status_change"      ], priority: 9, accepted_args: 4  );
-		add_action( hook_name: "admin_init",                         callback: [ $this, "order_notification"       ]        );
+		add_action( hook_name: "woocommerce_order_status_changed", callback: [ $this, "order_split" ], priority: 7, accepted_args: 4 );
+		add_action( hook_name: "woocommerce_order_status_changed", callback: [ $this, "order_status_change" ], priority: 9, accepted_args: 4 );
+		add_action( hook_name: "admin_init", callback: [ $this, "order_notification" ] );
 		// Shipping Actions
-		add_filter( hook_name: "woocommerce_shipping_methods",       callback: [ $this, "shipping_method"          ]        );
+		add_filter( hook_name: "woocommerce_shipping_methods", callback: [ $this, "shipping_method" ] );
 
 		// Order Box Actions
-		add_action( hook_name: "woocommerce_order_actions",                         callback: [ $this, "add_order_box_action"     ] );
+		add_action( hook_name: "woocommerce_order_actions", callback: [ $this, "add_order_box_action" ] );
 		add_action( hook_name: "woocommerce_order_action_wc_fastshop_order_action", callback: [ $this, "process_order_box_action" ] );
 	}
 
@@ -703,14 +703,14 @@ class Triibo_Fast_Shop
 	 *
      * @since 1.0.0
 	 *
-	 * @param bool   	$false
-	 * @param array  	$upload
-	 * @param int    	$product_get_id
-	 * @param array  	$images
+	 * @param bool   			$false
+	 * @param array|WP_Error 	$upload
+	 * @param int    			$product_get_id
+	 * @param array  			$images
 	 *
 	 * @return true
 	 */
-	public function image_upload_error( bool $false, array $upload, int $product_get_id, array $images ) : true
+	public function image_upload_error( bool $false, array|WP_Error $upload, int $product_get_id, array $images ) : true
 	{
 		return true;
 	}
