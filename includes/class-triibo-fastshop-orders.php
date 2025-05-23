@@ -123,22 +123,6 @@ class Triibo_Fast_Shop_Orders
 	 */
 	private function process_order() : void
     {
-        // // qlqr_status ( -processando -concluido )  --> aguardando   ==  cria FS
-        // // pendente                                 --> malsucedido  ==  cria FS
-        // // aguardando || malsucedido                --> processando  ==  aprova FS
-        // // qlqr_status ( -pendente )                --> cancelado    ==  cancela FS
-        // // qlqr_status ( -aguardando -malsucedido ) --> processando  ==  cria e aprova FS
-
-        // // qlqr_status ( -processando -concluido )  --> aguardando   ==  cria FS
-        // // aguardando                               --> processando  ==  aprova FS
-        // // qlqr_status ( -pendente )                --> cancelado    ==  cancela FS
-        // // qlqr_status ( -aguardando )              --> processando  ==  cria e aprova FS
-
-        // 09/01/23
-        // qlqr_status ( -concluido )               --> aguardando   ==  cria FS
-        // aguardando                               --> processando  ==  aprova FS
-        // qlqr_status ( -pendente )                --> cancelado    ==  cancela FS
-
         /**
          * qlqr_status ( -concluido ) --> aguardando
          * pendente --> processando

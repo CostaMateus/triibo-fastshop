@@ -6,7 +6,7 @@
  * Author: 					Mateus Costa
  * Author URI: 				https://costamateus.com.br/
  * Version: 				2.1.0
- * Text Domain: 			triibo_fast_shop
+ * Text Domain: 			triibo-fast-shop
  * Requires Plugins:        triibo-api-services, woocommerce
  * Requires at least: 		6.6
  * Requires PHP: 			8.0
@@ -53,7 +53,7 @@ class Triibo_Fast_Shop
 	 *
 	 * @var string
 	 */
-	const DOMAIN  = "triibo_fast_shop";
+	const DOMAIN  = "triibo-fast-shop";
 
 	/**
 	 * Seller name ID.
@@ -655,7 +655,6 @@ class Triibo_Fast_Shop
 
 					if ( isset( $args[ "disabled" ] ) )
 					{
-						// hide the actual input bc if it was just a disabled input the info saved in the database would be wrong - bc it would pass empty values and wipe the actual information
 						echo $prependStart . "
 							<input type='{$args[ "subtype" ]}' id='{$args[ "id" ]}_disabled' {$step} {$max} {$min} name='{$args[ "name" ]}_disabled' disabled value='" . esc_attr( text: $value ) . "' />
 							<input type='hidden' id='{$args[ "id" ]}' {$step} {$max} {$min} name='{$args[ "name" ]}' value='" . esc_attr( text: $value ) . "' />" . $prependEnd;
@@ -673,10 +672,6 @@ class Triibo_Fast_Shop
 					echo "<label for='{$args[ "id" ]}' >{$args[ "label" ]}</label>";
 				}
 			break;
-
-			// default:
-			// 	# code...
-			// break;
 		}
 	}
 

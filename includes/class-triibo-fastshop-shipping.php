@@ -372,10 +372,10 @@ class Triibo_Fast_Shop_Shipping extends \WC_Shipping_Method
 
             $item       = $data[ "data" ];
 
-            $fs_normal  = 4799;
+            $fs_normal  = 4799; // hardcoded
 
             if ( get_home_url() === "http://shopkeeper.local" )
-                $fs_normal = 155;
+                $fs_normal = 155; // local
 
             $product->set_stock_status( status: ( $item[ "availability" ] ? "instock" : "outofstock" ) );
             $product->update_meta_data( key: "_fastshop_hub", value: "normal" );
